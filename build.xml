@@ -122,7 +122,7 @@
       <arg value="xslt/base/pipelines/docbook.xpl"/>
     </java>
 
-    <exec executable="diff" failonerror="true">
+    <exec executable="diff" failonerror="false">
       <arg value="--brief"/>
       <arg value="tests/result/smoketest.html"/>
       <arg value="tests/smoketest.html"/>

@@ -6,3 +6,5 @@
 /docs/RELEASENOTES.html
 /ext/tests/
 /local/
+.project
+xslt20-stylesheets.xpr
