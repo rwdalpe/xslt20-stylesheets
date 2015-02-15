@@ -6,6 +6,8 @@ It's just a bogus mess right now.</para>
 
 <refentry xml:id="default.table.column.widths"/>
 
+<refentry xml:id="scripts.builtin.ignore"/>
+<refentry xml:id="styles.builtin.ignore"/>
 <refentry xml:id="resource.root"/>
 <refentry xml:id="syntax-highlighter"/>
 <refentry xml:id="writing.mode"/>

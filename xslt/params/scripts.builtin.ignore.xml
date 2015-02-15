@@ -1,0 +1,28 @@
+<refentry xmlns="http://docbook.org/ns/docbook"
+    xmlns:src="http://nwalsh.com/xmlns/litprog/fragment"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    version="5.0" xml:id="scripts.builtin.ignore">
+    <refmeta>
+        <refentrytitle>scripts.builtin.ignore</refentrytitle>
+        <refmiscinfo role="type">boolean</refmiscinfo>
+    </refmeta>
+    <refnamediv>
+        <refname>scripts.builtin.ignore</refname>
+        <refpurpose>Don't embed links to the builtin script resources when generating output</refpurpose>
+    </refnamediv>
+    
+    <refsynopsisdiv>
+        <src:fragment xml:id='scripts.builtin.ignore.frag'>
+            <xsl:param name="scripts.builtin.ignore"
+                select="'0'"/>
+        </src:fragment>
+    </refsynopsisdiv>
+    
+    <refsect1><title>Description</title>
+        
+        <para>Disables embedding links to ancillary scripts used for annotations and dbmodnizr.
+        </para>
+        
+    </refsect1>
+</refentry>
