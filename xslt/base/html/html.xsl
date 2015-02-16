@@ -215,6 +215,21 @@ and a CSS style is specified.</para>
 
 <xsl:template name="t:user-javascript">
   <xsl:param name="node" select="."/>
+  
+  <xsl:if test="$html.scripts != ''">
+    <xsl:for-each select="tokenize($html.scripts, '\s+')">
+      <script src="{.}">
+        <xsl:choose>
+          <xsl:when test="ends-with(.,'.js')">
+            <xsl:attribute name="type" select="'text/javascript'"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <!-- ??? what type is this ??? -->
+          </xsl:otherwise>
+        </xsl:choose>
+      </script>
+    </xsl:for-each>
+  </xsl:if>
 </xsl:template>
 
 <xsl:template name="t:javascript">

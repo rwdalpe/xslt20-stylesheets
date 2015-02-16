@@ -16,6 +16,7 @@ It's just a bogus mess right now.</para>
 <refentry xml:id="draft.mode"/>
 
 <refentry xml:id="html.stylesheets"/>
+<refentry xml:id="html.scripts"/>
 <refentry xml:id="link.madeby.uri"/>
 <refentry xml:id="html.base"/>
 <refentry xml:id="generate.meta.abstract"/>

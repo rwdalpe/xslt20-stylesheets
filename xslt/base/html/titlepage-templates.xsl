@@ -97,10 +97,10 @@
     <tmpl:templates name="section sect1 sect2 sect3 sect4 sect5
                           simplesect">
       <tmpl:titlepage>
-        <div class="section-titlepage">
+        <header class="section-titlepage">
           <db:title/>
           <db:subtitle/>
-        </div>
+        </header>
       </tmpl:titlepage>
     </tmpl:templates>
 
