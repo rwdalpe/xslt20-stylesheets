@@ -19,6 +19,7 @@
 <p:option name="style" select="'docbook'"/>
 <p:option name="return-secondary" select="'false'"/>
 <p:option name="syntax-highlighter" select="if ($format='html') then 1 else 0"/>
+<p:option name="html-initial-stylesheet" select="'../html/final-pass.xsl'"/>
 
 <!-- Ideally, this pipeline wouldn't rely on an XML Calabash extensions,
      but it's a lot more convenient this way. See generic.xpl for a
@@ -173,9 +174,15 @@
         <p:output port="secondary" sequence="true">
           <p:pipe step="html-docbook" port="secondary"/>
         </p:output>
+        <p:load name="load-custom-stylesheet">
+          <p:with-option name="href" select="$html-initial-stylesheet"/>
+        </p:load>
         <p:xslt name="html-docbook">
+          <p:input port="source">
+            <p:pipe step="preprocessed" port="result"/>
+          </p:input>
           <p:input port="stylesheet">
-            <p:document href="../html/final-pass.xsl"/>
+            <p:pipe step="load-custom-stylesheet" port="result"/>
           </p:input>
           <p:input port="parameters">
             <p:pipe step="main" port="parameters"/>
