@@ -32,6 +32,7 @@
         </xsl:otherwise>
       </xsl:choose>
     </h3>
+    <xsl:apply-templates select="db:email"/>
   </div>
 </xsl:template>
 
