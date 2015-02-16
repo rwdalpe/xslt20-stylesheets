@@ -24,6 +24,9 @@
      but it's a lot more convenient this way. See generic.xpl for a
      version with no processor-specific extensions.
 -->
+<p:xinclude fixup-xml-base="false" fixup-xml-lang="false">
+  <p:input port="source"/>
+</p:xinclude>
 
 <p:declare-step type="pxp:set-base-uri">
   <p:input port="source"/>
