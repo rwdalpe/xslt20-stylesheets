@@ -277,10 +277,12 @@
                      |db:section/db:info/db:title" mode="m:titlepage-mode">
   <xsl:variable name="depth" select="min((count(ancestor::db:section), 5))"/>
 
+  <xsl:variable name="delta" select="if (ancestor::db:chapter) then 2 else 1"/>
+    
   <xsl:variable name="context"
                 select="if (parent::db:info) then parent::db:info/parent::* else parent::*"/>
 
-  <xsl:element name="h{$depth + 1}" namespace="http://www.w3.org/1999/xhtml">
+  <xsl:element name="h{$depth + $delta}" namespace="http://www.w3.org/1999/xhtml">
     <xsl:apply-templates select="$context" mode="m:object-title-markup">
       <xsl:with-param name="allow-anchors" select="true()"/>
     </xsl:apply-templates>
@@ -410,11 +412,16 @@
               mode="m:titlepage-mode">
   <xsl:variable name="context"
                 select="if (parent::db:info) then parent::db:info/parent::* else parent::*"/>
-  <h3>
+  <xsl:variable name="depth" 
+                select="min((count(ancestor::db:section
+                        |ancestor::db:chapter
+                        |ancestor::db:book), 5))"/>
+  
+  <xsl:element name="h{$depth + 1}" namespace="http://www.w3.org/1999/xhtml">
     <xsl:apply-templates select="$context" mode="m:object-title-markup">
       <xsl:with-param name="allow-anchors" select="true()"/>
     </xsl:apply-templates>
-  </h3>
+  </xsl:element>
 </xsl:template>
 
 <xsl:template match="db:tasksummary/db:title|db:tasksummary/db:info/db:title
