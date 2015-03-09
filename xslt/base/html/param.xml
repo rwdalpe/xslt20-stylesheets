@@ -130,6 +130,7 @@ It's just a bogus mess right now.</para>
 <refentry xml:id="html.longdesc"/>
 <refentry xml:id="html.longdesc.link"/>
 <refentry xml:id="base.dir"/>
+<refentry xml:id="output.dir"/>
 <refentry xml:id="ignore.image.scaling"/>
 <refentry xml:id="default.image.width"/>
 <refentry xml:id="img.src.path"/>

@@ -15,8 +15,6 @@
                 exclude-result-prefixes="db doc f ghost h m t u xlink xs ext"
                 version="2.0">
 
-<xsl:param name="output.dir" select="''"/>
-
 <!-- ==================================================================== -->
 
 <xsl:template match="db:screenshot">
