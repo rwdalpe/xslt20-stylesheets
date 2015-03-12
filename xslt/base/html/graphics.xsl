@@ -1047,21 +1047,28 @@ valign: <xsl:value-of select="@valign"/></xsl:message>
       <xsl:value-of select="."/>
     </xsl:when>
     <xsl:otherwise>
-      <xsl:value-of select="f:resolve-path(.,base-uri(.))"/>
-<!--
-      <xsl:variable name="absuri" select="f:resolve-path(.,base-uri(.))"/>
       <xsl:choose>
-        <xsl:when test="starts-with($absuri, 'file://')">
-          <xsl:value-of select="substring-after($absuri, 'file:/')"/>
-        </xsl:when>
-        <xsl:when test="starts-with($absuri, 'file:/')">
-          <xsl:value-of select="substring-after($absuri, 'file:')"/>
+        <xsl:when test="$output.dir != ''">
+          <xsl:value-of select="f:resolve-path(., $output.dir)"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="$absuri"/>
+          <xsl:value-of select="f:resolve-path(.,base-uri(.))"/>
+    <!--
+          <xsl:variable name="absuri" select="f:resolve-path(.,base-uri(.))"/>
+          <xsl:choose>
+            <xsl:when test="starts-with($absuri, 'file://')">
+              <xsl:value-of select="substring-after($absuri, 'file:/')"/>
+            </xsl:when>
+            <xsl:when test="starts-with($absuri, 'file:/')">
+              <xsl:value-of select="substring-after($absuri, 'file:')"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="$absuri"/>
+            </xsl:otherwise>
+          </xsl:choose>
+    -->
         </xsl:otherwise>
       </xsl:choose>
--->
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
