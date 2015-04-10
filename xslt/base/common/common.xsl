@@ -9,7 +9,8 @@
                 xmlns:t="http://docbook.org/xslt/ns/template"
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
                 xmlns:ext="http://docbook.org/extensions/xslt20"
-                exclude-result-prefixes="db doc f fp m t xs ext"
+                xmlns:usrfn="http://docbook.org/xslt/ns/user-extension"
+                exclude-result-prefixes="db doc f fp m t xs ext usrfn"
                 version="2.0">
 
 <xsl:param name="use.role.for.mediaobject" select="1"/>
@@ -848,6 +849,36 @@ or 0 if no object is selected.</para>
   </xsl:choose>
 </xsl:function>
 
+<doc:function name="usrfn:is-acceptable-mediaobject" xmlns="">
+<refpurpose>A customization shortcut for <function>f:is-acceptable-mediaobject</function>.
+Should return '1' if the specified media object is recognized.</refpurpose>
+
+<refdescription>
+<para>This template examines a media object and returns '1' if the
+object should be recognized as a graphic.</para>
+</refdescription>
+
+<refparameter>
+<variablelist>
+<varlistentry><term>object</term>
+<listitem>
+<para>The media object to consider.</para>
+</listitem>
+</varlistentry>
+</variablelist>
+</refparameter>
+
+<refreturn>
+<para>0 or 1</para>
+</refreturn>
+</doc:function>
+
+<xsl:function name="usrfn:is-acceptable-mediaobject" as="xs:integer">
+  <xsl:param name="object" as="element()" />
+  <xsl:value-of>1</xsl:value-of>
+</xsl:function>
+
+
 <doc:function name="f:is-acceptable-mediaobject" xmlns="">
 <refpurpose>Returns '1' if the specified media object is recognized.</refpurpose>
 
@@ -893,8 +924,10 @@ object is recognized as a graphic.</para>
                           if ($data/svg:*)
                           then 'svg'
                           else ''"/>
+                          
 
   <xsl:choose>
+    <xsl:when test="usrfn:is-acceptable-mediaobject($object) = 0">0</xsl:when>
     <xsl:when test="$use.svg = 0 and $format = 'svg'">0</xsl:when>
     <xsl:when xmlns:svg="http://www.w3.org/2000/svg"
               test="$use.svg != 0 and $format = 'svg'">1</xsl:when>
