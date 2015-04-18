@@ -1049,7 +1049,7 @@ valign: <xsl:value-of select="@valign"/></xsl:message>
     <xsl:otherwise>
       <xsl:choose>
         <xsl:when test="$output.dir != ''">
-          <xsl:value-of select="f:resolve-path(., $output.dir)"/>
+          <xsl:value-of select="f:resolve-path(., iri-to-uri($output.dir))"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:value-of select="f:resolve-path(.,base-uri(.))"/>

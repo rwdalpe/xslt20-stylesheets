@@ -1010,7 +1010,7 @@ object is recognized as a graphic.</para>
         <xsl:value-of use-when="not(function-available('ext:cwd'))" select="$output.dir"/>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:value-of select="$output.dir"/>
+        <xsl:value-of select="iri-to-uri($output.dir)"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:variable>
