@@ -25,6 +25,7 @@
 <xsl:param name="glossary.collection" select="''"/>
 <xsl:param name="bibliography.collection" select="''"/>
 <xsl:param name="docbook-namespace" select="'http://docbook.org/ns/docbook'"/>
+<xsl:param name="glossary.sort" select="1"/>
 
 <xsl:template match="/">
   <xsl:apply-templates/>
@@ -187,6 +188,9 @@ copied by normalization.</para>
 	</xsl:message>
       </xsl:if>
 
+      <xsl:variable name="language" select="f:lang(.)"/>
+
+
       <xsl:element name="glossary" namespace="{$docbook-namespace}">
 	<xsl:for-each select="$glossary/db:glossary/@*">
 	  <xsl:if test="name(.) != 'role'">
@@ -218,14 +222,29 @@ copied by normalization.</para>
 	    </xsl:apply-templates>
 	  </xsl:when>
 	  <xsl:otherwise>
-	    <xsl:apply-templates select="$external.glossary//db:glossentry"
-				 mode="m:copy-external-glossary">
-	      <xsl:with-param name="terms"
-			      select="//db:glossterm[not(parent::db:glossdef)]
-				      |//db:firstterm
-				      |$seealsos"/>
-	      <xsl:with-param name="divs" select="$divs"/>
-	    </xsl:apply-templates>
+	    <xsl:choose>
+            <xsl:when test="$glossary.sort != 0">
+              <xsl:apply-templates select="$external.glossary//db:glossentry"
+                                   mode="m:copy-external-glossary">
+                <xsl:with-param name="terms"
+                                select="//db:glossterm[not(parent::db:glossdef)]
+                                        |//db:firstterm
+                                        |$seealsos"/>
+                <xsl:with-param name="divs" select="$divs"/>
+                <xsl:sort lang="{$language}" select="normalize-space(concat(@sortas, db:glossterm[not(parent::db:glossentry/@sortas) or parent::db:glossentry/@sortas = '']))"/>
+              </xsl:apply-templates>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:apply-templates select="$external.glossary//db:glossentry"
+                                   mode="m:copy-external-glossary">
+                <xsl:with-param name="terms"
+                                select="//db:glossterm[not(parent::db:glossdef)]
+                                        |//db:firstterm
+                                        |$seealsos"/>
+                <xsl:with-param name="divs" select="$divs"/>
+              </xsl:apply-templates>
+            </xsl:otherwise>
+          </xsl:choose>
 	  </xsl:otherwise>
 	</xsl:choose>
       </xsl:element>

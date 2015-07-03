@@ -64,6 +64,7 @@ It's just a bogus mess right now.</para>
 <refentry xml:id="persistent.generated.ids"/>
 <refentry xml:id="bibliography.numbered"/>
 <refentry xml:id="bibliography.collection"/>
+<refentry xml:id="glossary.sort"/>
 <refentry xml:id="glossary.collection"/>
 <refentry xml:id="glossentry.show.acronym"/>
 <refentry xml:id="glossterm.auto.link"/>
