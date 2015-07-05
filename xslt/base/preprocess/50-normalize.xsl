@@ -20,11 +20,8 @@
   <xsl:param name="glossary.collection" select="''" />
   <xsl:param name="bibliography.collection" select="''" />
   <xsl:param name="docbook-namespace" select="'http://docbook.org/ns/docbook'" />
-  <xsl:param name="glossary.sort" select="1" />
 
-  <xsl:template match="/">
-    <xsl:apply-templates />
-  </xsl:template>
+  <xsl:include href="" id="parameter-include"/>
 
   <!-- ============================================================ -->
   <!-- normalize content -->

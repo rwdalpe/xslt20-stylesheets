@@ -17,13 +17,35 @@
   <p:option name="return-secondary" select="'false'" />
   <p:option name="syntax-highlighter" select="if ($format='html') then 1 else 0" />
   <p:option name="html-initial-stylesheet" select="'../html/final-pass.xsl'" />
+  <p:option name="preprocess-params-file" select="''" />
 
-  <p:xinclude fixup-xml-base="false" fixup-xml-lang="false">
+  <p:xinclude name="xinclude" fixup-xml-base="false" fixup-xml-lang="false">
     <p:input port="source" />
   </p:xinclude>
 
-  <!-- Ideally, this pipeline wouldn't rely on an XML Calabash extensions, but it's 
-    a lot more convenient this way. See generic.xpl for a version with no processor-specific 
+  <p:declare-step type="dbp:preprocess-parametrize">
+    <p:input port="source" />
+    <p:output port="result" />
+    <p:option name="params-file" required="true" />
+    <p:xslt>
+      <p:input port="stylesheet">
+        <p:document href="../preprocess/parametrize-preprocess-stylesheet.xsl" />
+      </p:input>
+      <p:with-param name="parameters-file" select="$params-file" />
+      <p:log port="result" href="/tmp/ppnormalized.xsl" />
+    </p:xslt>
+  </p:declare-step>
+
+  <dbp:preprocess-parametrize name="parametrize-normalize">
+    <p:input port="source">
+      <p:document href="../preprocess/50-normalize.xsl" />
+    </p:input>
+    <p:with-option name="params-file" select="$preprocess-params-file" />
+  </dbp:preprocess-parametrize>
+
+
+  <!-- Ideally, this pipeline wouldn't rely on an XML Calabash extensions, but it's
+    a lot more convenient this way. See generic.xpl for a version with no processor-specific
     extensions. -->
 
   <p:declare-step type="pxp:set-base-uri">
@@ -39,6 +61,9 @@
   </p:declare-step>
 
   <p:xslt name="logical-structure">
+    <p:input port="source">
+      <p:pipe step="xinclude" port="result" />
+    </p:input>
     <p:input port="stylesheet">
       <p:document href="../preprocess/00-logstruct.xsl" />
     </p:input>
@@ -103,7 +128,7 @@
 
   <p:xslt name="normalize">
     <p:input port="stylesheet">
-      <p:document href="../preprocess/50-normalize.xsl" />
+      <p:pipe step="parametrize-normalize" port="result" />
     </p:input>
     <!-- <p:log port="result" href="/tmp/50-normalize.xml"/> -->
   </p:xslt>
@@ -128,8 +153,9 @@
     <!-- <p:log port="result" href="/tmp/ex.xml"/> -->
   </p:xslt>
 
-  <!-- There used to be a step here that deleted the ghost: attributes inserted earlier. 
-    You can't do that, some of the final-pass processing, particularly for tables and 
+  <!-- There used to be a step here that deleted the ghost: attributes inserted earlier.
+    You can't do that, some of the final-pass processing, particularly for tables
+    and
     verbatim environments, relies on the presence of computed ghost: attributes. -->
 
   <p:xslt name="preprocessed">
@@ -235,7 +261,7 @@
           <p:output port="secondary" sequence="true">
             <p:pipe step="html-user-cwd" port="secondary" />
           </p:output>
-          <!-- This relies on an XML Calabash extension function as a user convenience. 
+          <!-- This relies on an XML Calabash extension function as a user convenience.
             I'm open to suggestions... -->
           <p:load name="load-style">
             <p:with-option name="href" select="resolve-uri($style, exf:cwd())" />
@@ -281,7 +307,7 @@
           <p:output port="secondary" sequence="true">
             <p:pipe step="print-user-cwd" port="secondary" />
           </p:output>
-          <!-- This relies on an XML Calabash extension function as a user convenience. 
+          <!-- This relies on an XML Calabash extension function as a user convenience.
             I'm open to suggestions... -->
           <p:load name="load-style">
             <p:with-option name="href" select="resolve-uri($style, exf:cwd())" />
@@ -343,7 +369,7 @@
           <p:output port="secondary" sequence="true">
             <p:pipe step="fo-user-cwd" port="secondary" />
           </p:output>
-          <!-- This relies on an XML Calabash extension function as a user convenience. 
+          <!-- This relies on an XML Calabash extension function as a user convenience.
             I'm open to suggestions... -->
           <p:load name="load-style">
             <p:with-option name="href" select="resolve-uri($style, exf:cwd())" />
