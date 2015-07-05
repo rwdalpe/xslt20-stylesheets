@@ -8,20 +8,12 @@
 
   <xsl:import href="../common/l10n.xsl" />
   <xsl:import href="lib/normalize-cals.xsl" />
+  <xsl:import href="50-normalize-defaultparams.xsl" />
 
   <xsl:key name="id" match="*" use="@xml:id" />
   <xsl:key name="genid" match="*" use="generate-id(.)" />
 
-  <xsl:param name="l10n.gentext.default.language" select="'en'" />
-  <xsl:param name="l10n.gentext.language" select="''" />
-  <xsl:param name="l10n.gentext.use.xref.language" select="0" />
-  <xsl:param name="l10n.locale.dir">../common/locales/</xsl:param>
-
-  <xsl:param name="glossary.collection" select="''" />
-  <xsl:param name="bibliography.collection" select="''" />
-  <xsl:param name="docbook-namespace" select="'http://docbook.org/ns/docbook'" />
-
-  <xsl:include href="" id="parameter-include"/>
+  <xsl:include href="" id="parameter-include" />
 
   <!-- ============================================================ -->
   <!-- normalize content -->
@@ -76,7 +68,8 @@
         explicit during normalization.
       </para>
       <para>External glossaries and bibliographies (not yet!) are also
-        copied by normalization.
+        copied by
+        normalization.
       </para>
     </refdescription>
   </doc:mode>
@@ -339,7 +332,8 @@
     <refdescription>
       <para>
         If the context node does not have a title, this template will
-        generate one. In either case, the title will be placed or moved inside
+        generate
+        one. In either case, the title will be placed or moved inside
         an
         <tag>info</tag>
         which will be created if necessary.
@@ -437,7 +431,8 @@
 
   <doc:template name="n:normalize-dbinfo" xmlns="http://docbook.org/ns/docbook">
     <refpurpose>Copy the specified nodes, normalizing other content
-      if appropriate
+      if
+      appropriate
     </refpurpose>
 
     <refdescription>
@@ -558,7 +553,7 @@
     <xsl:apply-templates select="$normalized" mode="m:verbatim-phase-1" />
   </xsl:template>
 
-  <!-- HACK: m:verbatim-phase-1 was not implemented. This is a temporary noop implementation 
+  <!-- HACK: m:verbatim-phase-1 was not implemented. This is a temporary noop implementation
     that at least
     does not strip verbatim elements. -->
   <xsl:template match="@*|node()" mode="m:verbatim-phase-1"
