@@ -5,6 +5,9 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ta="http://docbook.org/xslt/ns/transclusion-annotation"
   exclude-result-prefixes="f fp mp xs">
 
+  <xsl:import href="preprocess-defaultparams.xsl"/>
+  <xsl:include href="" id="parameter-include" />
+
   <xsl:output method="xml" encoding="utf-8" indent="no"
     omit-xml-declaration="yes" />
 
@@ -15,9 +18,6 @@
     but perhaps NOT according to the latest document
     http://docbook.org/docs/transclusion/
   -->
-
-  <!-- Separator for auto generated prefixes -->
-  <xsl:param name="psep" select="'---'" />
 
   <xsl:template match="/">
     <xsl:sequence select="f:transclude-and-adjust-idrefs(/)" />

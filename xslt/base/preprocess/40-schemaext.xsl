@@ -10,14 +10,9 @@
     http://xmlguru.cz/2006/03/easy-docbook-specialization
   -->
 
-  <xsl:param name="schemaext.schema" select="''" />
+  <xsl:import href="preprocess-defaultparams.xsl" />
 
-  <xsl:param name="schema"
-    select="if ($schemaext.schema = '')
-		   then ()
-		   else document($schemaext.schema)" />
-
-  <xsl:param name="schema-extensions" as="element()*" select="()" />
+  <xsl:include href="" id="parameter-include" />
 
   <xsl:template match="/" as="document-node()">
     <xsl:variable name="content" as="document-node()">

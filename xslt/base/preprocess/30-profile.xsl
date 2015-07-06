@@ -4,6 +4,10 @@
   xmlns:mp="http://docbook.org/xslt/ns/mode/private" xmlns:xs="http://www.w3.org/2001/XMLSchema"
   exclude-result-prefixes="doc fp mp xs" version="2.0">
 
+  <xsl:import href="preprocess-defaultparams.xsl" />
+
+  <xsl:include href="" id="parameter-include" />
+
   <xsl:output method="xml" encoding="utf-8" indent="no"
     omit-xml-declaration="yes" />
 
@@ -12,22 +16,6 @@
     by http://www.docbook.org/tdg5/en/html/ref-elements.html#common.effectivity.attributes
     and http://www.sagehill.net/docbookxsl/Profiling.html
   -->
-
-  <xsl:param name="profile.separator" select="';'" />
-  <xsl:param name="profile.lang" select="()" />
-  <xsl:param name="profile.revisionflag" select="()" />
-  <xsl:param name="profile.role" select="()" />
-  <xsl:param name="profile.arch" select="()" />
-  <xsl:param name="profile.audience" select="()" />
-  <xsl:param name="profile.condition" select="()" />
-  <xsl:param name="profile.conformance" select="()" />
-  <xsl:param name="profile.os" select="()" />
-  <xsl:param name="profile.outputformat" select="()" />
-  <xsl:param name="profile.revision" select="()" />
-  <xsl:param name="profile.security" select="()" />
-  <xsl:param name="profile.userlevel" select="()" />
-  <xsl:param name="profile.vendor" select="()" />
-  <xsl:param name="profile.wordsize" select="()" />
 
   <xsl:template match="*">
     <xsl:variable name="suppress" as="xs:boolean*">

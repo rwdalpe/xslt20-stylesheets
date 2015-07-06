@@ -22,6 +22,41 @@
     <p:xinclude name="xinclude" fixup-xml-base="false"
       fixup-xml-lang="false" />
 
+    <dbp:preprocess-parametrize name="parametrize-logstruct">
+      <p:input port="source">
+        <p:document href="../../preprocess/00-logstruct.xsl" />
+      </p:input>
+      <p:with-option name="params-file" select="$preprocess-params-file" />
+    </dbp:preprocess-parametrize>
+
+    <dbp:preprocess-parametrize name="parametrize-transclude">
+      <p:input port="source">
+        <p:document href="../../preprocess/20-transclude.xsl" />
+      </p:input>
+      <p:with-option name="params-file" select="$preprocess-params-file" />
+    </dbp:preprocess-parametrize>
+
+    <dbp:preprocess-parametrize name="parametrize-profile">
+      <p:input port="source">
+        <p:document href="../../preprocess/30-profile.xsl" />
+      </p:input>
+      <p:with-option name="params-file" select="$preprocess-params-file" />
+    </dbp:preprocess-parametrize>
+
+    <dbp:preprocess-parametrize name="parametrize-schemaext">
+      <p:input port="source">
+        <p:document href="../../preprocess/40-schemaext.xsl" />
+      </p:input>
+      <p:with-option name="params-file" select="$preprocess-params-file" />
+    </dbp:preprocess-parametrize>
+
+    <dbp:preprocess-parametrize name="parametrize-verbatim">
+      <p:input port="source">
+        <p:document href="../../preprocess/45-verbatim.xsl" />
+      </p:input>
+      <p:with-option name="params-file" select="$preprocess-params-file" />
+    </dbp:preprocess-parametrize>
+
     <dbp:preprocess-parametrize name="parametrize-normalize">
       <p:input port="source">
         <p:document href="../../preprocess/50-normalize.xsl" />
@@ -34,7 +69,7 @@
         <p:pipe step="xinclude" port="result" />
       </p:input>
       <p:input port="stylesheet">
-        <p:document href="../../preprocess/00-logstruct.xsl" />
+        <p:pipe step="parametrize-logstruct" port="result" />
       </p:input>
       <p:input port="parameters">
         <p:empty />
@@ -51,7 +86,7 @@
 
     <p:xslt name="transclude">
       <p:input port="stylesheet">
-        <p:document href="../../preprocess/20-transclude.xsl" />
+        <p:pipe step="parametrize-transclude" port="result" />
       </p:input>
       <p:input port="parameters">
         <p:empty />
@@ -61,7 +96,7 @@
 
     <p:xslt name="profile">
       <p:input port="stylesheet">
-        <p:document href="../../preprocess/30-profile.xsl" />
+        <p:pipe step="parametrize-profile" port="result" />
       </p:input>
       <!-- Use the parameters passed to the pipeline -->
       <!-- <p:log port="result" href="/tmp/30-profile.xml"/> -->
@@ -69,7 +104,7 @@
 
     <p:xslt name="schemaext">
       <p:input port="stylesheet">
-        <p:document href="../../preprocess/40-schemaext.xsl" />
+        <p:pipe step="parametrize-schemaext" port="result" />
       </p:input>
       <!-- <p:log port="result" href="/tmp/40-schemaext.xml"/> -->
     </p:xslt>
@@ -78,7 +113,7 @@
       <p:when test="$syntax-highlighter = 0">
         <p:xslt name="run45">
           <p:input port="stylesheet">
-            <p:document href="../../preprocess/45-verbatim.xsl" />
+            <p:pipe step="parametrize-verbatim" port="result" />
           </p:input>
           <!-- <p:log port="result" href="/tmp/45-verbatim.xml"/> -->
         </p:xslt>

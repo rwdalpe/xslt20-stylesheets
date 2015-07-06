@@ -10,14 +10,9 @@
   exclude-result-prefixes="db doc h f fp ghost m fn db h t ext xs tp" version="2.0">
 
   <!-- ====================================================================== -->
+  <xsl:import href="preprocess-defaultparams.xsl"/>
 
-  <xsl:param name="verbatim.trim.blank.lines" select="1" />
-  <xsl:param name="callout.defaultcolumn" select="60" />
-  <xsl:param name="callout.unicode" select="0" />
-  <xsl:param name="callout.unicode.number.limit" select="'10'" />
-  <xsl:param name="callout.unicode.start.character" select="10102" />
-  <xsl:param name="line-numbers" select="1" />
-
+  <xsl:include href="" id="parameter-include" />
   <!-- ============================================================ -->
 
   <xsl:function name="f:pad">

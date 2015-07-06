@@ -8,7 +8,7 @@
 
   <xsl:import href="../common/l10n.xsl" />
   <xsl:import href="lib/normalize-cals.xsl" />
-  <xsl:import href="50-normalize-defaultparams.xsl" />
+  <xsl:import href="preprocess-defaultparams.xsl" />
 
   <xsl:key name="id" match="*" use="@xml:id" />
   <xsl:key name="genid" match="*" use="generate-id(.)" />

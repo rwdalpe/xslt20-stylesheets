@@ -15,6 +15,10 @@
      provides an xml:base attribute and replaces all entityref
      attributes with fileref. -->
 
+  <xsl:import href="preprocess-defaultparams.xsl"/>
+
+  <xsl:include href="" id="parameter-include" />
+
 <xsl:output method="xml" encoding="utf-8" indent="no"
             omit-xml-declaration="yes"/>
 

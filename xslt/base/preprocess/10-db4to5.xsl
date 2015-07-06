@@ -9,6 +9,11 @@
 
 <!-- This stylesheet attempts to convert DocBook V4.x into DocBook V5.x -->
 
+  <xsl:import href="preprocess-defaultparams.xsl"/>
+
+  <xsl:include href="" id="parameter-include" />
+
+
 <xsl:variable name="version" select="'1.0'"/>
 
 <xsl:output method="xml" encoding="utf-8" indent="no"
