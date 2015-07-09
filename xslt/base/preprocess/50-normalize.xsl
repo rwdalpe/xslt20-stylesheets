@@ -233,28 +233,43 @@
               </xsl:apply-templates>
             </xsl:when>
             <xsl:otherwise>
+              <xsl:variable name="docglossentries" as="element()*">
+                <xsl:apply-templates select="$external.glossary//db:glossentry"
+                  mode="m:copy-external-glossary">
+                  <xsl:with-param name="terms"
+                    select="//db:glossterm[not(parent::db:glossdef)]
+                                      |//db:firstterm
+                                      |$seealsos" />
+                  <xsl:with-param name="divs" select="$divs" />
+                </xsl:apply-templates>
+              </xsl:variable>
+              <xsl:variable name="externalglossentries" as="element()*">
+                <xsl:apply-templates select="$external.glossary//db:glossentry"
+                  mode="m:copy-external-glossary-recursive">
+                  <xsl:with-param name="source" select="$external.glossary"/>
+                  <xsl:with-param name="terms"
+                    select="$docglossentries//db:glossterm[not(parent::db:glossentry)]" />
+                  <xsl:with-param name="divs" select="$divs" />
+                </xsl:apply-templates>
+              </xsl:variable>
               <xsl:choose>
-                <xsl:when test="$glossary.sort != 0">
-                  <xsl:apply-templates select="$external.glossary//db:glossentry"
-                    mode="m:copy-external-glossary">
-                    <xsl:with-param name="terms"
-                      select="//db:glossterm[not(parent::db:glossdef)]
-                                        |//db:firstterm
-                                        |$seealsos" />
-                    <xsl:with-param name="divs" select="$divs" />
+                <xsl:when test="$glossary.sort != 0">  
+                  <xsl:for-each-group select="$docglossentries | $externalglossentries" group-by="db:glossterm">
                     <xsl:sort lang="{$language}"
-                      select="normalize-space(concat(@sortas, db:glossterm[not(parent::db:glossentry/@sortas) or parent::db:glossentry/@sortas = '']))" />
-                  </xsl:apply-templates>
+                        select="normalize-space(concat(current-group()[1]/@sortas, current-group()[1]/db:glossterm[not(parent::db:glossentry/@sortas) or parent::db:glossentry/@sortas = '']))" />
+                    <!-- 
+                      There is a bug (maybe a regression) in Saxon that causes a dereferenced
+                      variable error for $language if you don't use it within this block. Hence,
+                      we have this empty if statement. 
+                    -->
+                    <xsl:if test="$language"/>
+                    <xsl:copy-of select="current-group()[1]"/>
+                  </xsl:for-each-group>
                 </xsl:when>
                 <xsl:otherwise>
-                  <xsl:apply-templates select="$external.glossary//db:glossentry"
-                    mode="m:copy-external-glossary">
-                    <xsl:with-param name="terms"
-                      select="//db:glossterm[not(parent::db:glossdef)]
-                                        |//db:firstterm
-                                        |$seealsos" />
-                    <xsl:with-param name="divs" select="$divs" />
-                  </xsl:apply-templates>
+                  <xsl:for-each-group select="$docglossentries | $externalglossentries" group-by="db:glossterm">
+                    <xsl:copy-of select="current-group()[1]"/>
+                  </xsl:for-each-group>
                 </xsl:otherwise>
               </xsl:choose>
             </xsl:otherwise>
@@ -634,6 +649,31 @@
           <xsl:copy-of select="$entries" />
         </xsl:otherwise>
       </xsl:choose>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="db:glossentry" mode="m:copy-external-glossary-recursive">
+    <xsl:param name="source" />
+    <xsl:param name="terms" />
+    <xsl:param name="divs" />
+
+    <xsl:variable name="include"
+      select="for $dterm in $terms
+                           return 
+                              for $gterm in db:glossterm
+                                 return
+                                    if (string($dterm) = string($gterm)
+                                        or $dterm/@baseform = string($gterm))
+                                    then 'x'
+                                    else ()" />
+
+    <xsl:if test="$include != ''">
+      <xsl:copy-of select="." />
+      <xsl:apply-templates select="$source//db:glossentry" mode="m:copy-external-glossary-recursive">
+        <xsl:with-param name="source" select="$source"/>
+        <xsl:with-param name="terms" select=".//db:glossterm[not(parent::db:glossentry)]"/>
+        <xsl:with-param name="divs" select="()"/>
+      </xsl:apply-templates>
     </xsl:if>
   </xsl:template>
 
