@@ -659,14 +659,22 @@
                                     if (string($dterm) = string($gterm)
                                         or $dterm/@baseform = string($gterm))
                                     then 'x'
-                                    else ()" />
-
+                                      else ()" />
+  
     <xsl:if test="$include != ''">
       <xsl:copy-of select="." />
-      <xsl:apply-templates select="$glossary-source//db:glossentry" mode="m:copy-external-glossary">
-        <xsl:with-param name="glossary-source" select="$glossary-source"/>
-        <xsl:with-param name="terms" select=".//db:glossterm[not(parent::db:glossentry)]"/>
-        <xsl:with-param name="divs" select="()"/>
+      <xsl:variable name="glossary-source-excluded">
+        <db:glossary>
+          <xsl:sequence select="$glossary-source//db:glossentry[not(string(./db:glossterm) = string(current()/db:glossterm))]"/>
+        </db:glossary>
+      </xsl:variable>
+        
+      <xsl:apply-templates select="$glossary-source-excluded//db:glossentry"
+        mode="m:copy-external-glossary">
+        <xsl:with-param name="glossary-source" select="$glossary-source-excluded" />
+        <xsl:with-param name="terms"
+          select=".//db:glossterm[not(parent::db:glossentry)]" />
+        <xsl:with-param name="divs" select="()" />
       </xsl:apply-templates>
     </xsl:if>
   </xsl:template>
