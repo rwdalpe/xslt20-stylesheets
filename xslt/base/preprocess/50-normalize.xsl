@@ -246,9 +246,9 @@
               </xsl:variable>
               <xsl:choose>
                 <xsl:when test="$glossary.sort != 0">  
-                  <xsl:for-each-group select="$glossentries" group-by="db:glossterm">
+                  <xsl:for-each-group select="$glossentries" group-by="db:glossterm[1]">
                     <xsl:sort lang="{$language}"
-                        select="normalize-space(concat(current-group()[1]/@sortas, current-group()[1]/db:glossterm[not(parent::db:glossentry/@sortas) or parent::db:glossentry/@sortas = '']))" />
+                        select="normalize-space(concat(current-group()[1]/@sortas, current-group()[1]/db:glossterm[not(parent::db:glossentry/@sortas) or parent::db:glossentry/@sortas = ''][1]))" />
                     <!-- 
                       There is a bug (maybe a regression) in Saxon that causes a dereferenced
                       variable error for $language if you don't use it within this block. Hence,
@@ -665,10 +665,9 @@
       <xsl:copy-of select="." />
       <xsl:variable name="glossary-source-excluded">
         <db:glossary>
-          <xsl:sequence select="$glossary-source//db:glossentry[not(string(./db:glossterm) = string(current()/db:glossterm))]"/>
+          <xsl:sequence select="$glossary-source//db:glossentry[not(string(./db:glossterm[1]) = string(current()/db:glossterm[1]))]"/>
         </db:glossary>
       </xsl:variable>
-        
       <xsl:apply-templates select="$glossary-source-excluded//db:glossentry"
         mode="m:copy-external-glossary">
         <xsl:with-param name="glossary-source" select="$glossary-source-excluded" />
