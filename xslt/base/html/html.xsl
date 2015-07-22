@@ -211,11 +211,7 @@ and a CSS style is specified.</para>
   <xsl:if test="$styles.builtin.ignore != '0'">
     <xsl:call-template name="t:syntax-highlight-head"/>
   </xsl:if>
-</xsl:template>
 
-<xsl:template name="t:user-javascript">
-  <xsl:param name="node" select="."/>
-  
   <xsl:if test="$html.scripts != ''">
     <xsl:for-each select="tokenize($html.scripts, '\s+')">
       <script src="{.}">
@@ -230,6 +226,10 @@ and a CSS style is specified.</para>
       </script>
     </xsl:for-each>
   </xsl:if>
+</xsl:template>
+
+<xsl:template name="t:user-javascript">
+  <xsl:param name="node" select="."/>
 </xsl:template>
 
 <xsl:template name="t:javascript">
