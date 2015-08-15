@@ -330,9 +330,9 @@ primary result document.</para>
   <xsl:param name="node" select="."/>
 
   <head>
-    <title>
-      <xsl:value-of select="f:title($node)"/>
-    </title>
+    <xsl:call-template name="t:html-title-content">
+      <xsl:with-param name="node" select="$node"/>
+    </xsl:call-template>
 
     <xsl:if test="$html.base != ''">
       <base href="{$html.base}"/>
@@ -388,6 +388,13 @@ body { background-image: url('<xsl:value-of select="$draft.watermark.image"/>');
       <xsl:with-param name="node" select="$node"/>
     </xsl:call-template>
   </head>
+</xsl:template>
+
+<xsl:template name="t:html-title-content">
+  <xsl:param name="node" select="."/>
+  <title>
+    <xsl:value-of select="f:title($node)"/>
+  </title>
 </xsl:template>
 
 <!-- ====================================================================== -->
