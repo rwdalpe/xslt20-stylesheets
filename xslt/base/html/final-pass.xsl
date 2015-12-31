@@ -84,6 +84,7 @@
 
       <xsl:apply-templates/>
       <xsl:call-template name="t:syntax-highlight-body"/>
+			<xsl:call-template name="t:user-javascript-body" />
     </body>
   </html>
 

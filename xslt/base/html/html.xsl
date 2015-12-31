@@ -232,6 +232,10 @@ and a CSS style is specified.</para>
   <xsl:param name="node" select="."/>
 </xsl:template>
 
+<xsl:template name="t:user-javascript-body">
+	<xsl:param name="node" select="." />
+</xsl:template>
+
 <xsl:template name="t:javascript">
   <xsl:param name="node" select="."/>
   <xsl:call-template name="t:system-javascript">
