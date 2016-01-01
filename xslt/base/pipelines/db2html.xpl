@@ -14,6 +14,7 @@
 <p:option name="preprocess" select="''"/>
 <p:option name="postprocess" select="''"/>
 <p:option name="initial-stylesheet" select="''"/>
+<p:option name="preprocess-params-file" select="''"/>
 
 <p:import href="docbook.xpl"/>
 
@@ -21,6 +22,8 @@
   <p:with-option name="style" select="$style"/>
   <p:with-option name="preprocess" select="$preprocess"/>
   <p:with-option name="postprocess" select="$postprocess"/>
+	<p:with-option name="initial-stylesheet" select="$initial-stylesheet"/>
+	<p:with-option name="preprocess-params-file" select="$preprocess-params-file"/>
 </dbp:docbook>
 
 </p:declare-step>

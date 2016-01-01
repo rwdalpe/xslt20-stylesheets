@@ -53,9 +53,15 @@
 			<p:with-option name="href" select="$html-initial-stylesheet" />
 		</p:load>
     <p:xslt name="html-docbook">
+			<p:input port="source">
+				<p:pipe step="main" port="source" />
+			</p:input>
       <p:input port="stylesheet">
         <p:pipe step="load-stylesheet" port="result" />
       </p:input>
+			<p:input port="parameters">
+				<p:pipe step="main" port="parameters" />
+			</p:input>
     </p:xslt>
   </p:when>
   <p:when test="$style = 'slides'">
@@ -67,9 +73,15 @@
 			<p:with-option name="href" select="$slides-initial-stylesheet" />
 		</p:load>
     <p:xslt name="html-slides">
+			<p:input port="source">
+				<p:pipe step="main" port="source" />
+			</p:input>
       <p:input port="stylesheet">
         <p:pipe step="load-stylesheet" port="result" />
       </p:input>
+			<p:input port="parameters">
+				<p:pipe step="main" port="parameters" />
+			</p:input>
     </p:xslt>
   </p:when>
   <p:when test="$style = 'slide-notes'">
@@ -81,9 +93,15 @@
 			<p:with-option name="href" select="$slidenotes-initial-stylesheet" />
 		</p:load>
     <p:xslt name="html-slides-notes">
+			<p:input port="source">
+				<p:pipe step="main" port="source" />
+			</p:input>
       <p:input port="stylesheet">
         <p:pipe step="load-stylesheet" port="result" />
       </p:input>
+			<p:input port="parameters">
+				<p:pipe step="main" port="parameters" />
+			</p:input>
     </p:xslt>
   </p:when>
   <p:when test="$style = 'publishers'">
@@ -95,9 +113,15 @@
 			<p:with-option name="href" select="$publishers-initial-stylesheet" />
 		</p:load>
 		<p:xslt name="html-publishers">
+			<p:input port="source">
+				<p:pipe step="main" port="source" />
+			</p:input>
       <p:input port="stylesheet">
         <p:pipe step="load-stylesheet" port="result" />
       </p:input>
+			<p:input port="parameters">
+				<p:pipe step="main" port="parameters" />
+			</p:input>
     </p:xslt>
   </p:when>
   <p:when test="$style = 'chunk'">
@@ -109,9 +133,15 @@
 			<p:with-option name="href" select="$chunk-initial-stylesheet" />
 		</p:load>
     <p:xslt name="html-chunk">
+			<p:input port="source">
+				<p:pipe step="main" port="source" />
+			</p:input>
       <p:input port="stylesheet">
         <p:pipe step="load-stylesheet" port="result" />
       </p:input>
+			<p:input port="parameters">
+				<p:pipe step="main" port="parameters" />
+			</p:input>
     </p:xslt>
   </p:when>
   <p:otherwise xmlns:exf="http://exproc.org/standard/functions">
