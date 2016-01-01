@@ -14,15 +14,16 @@
 		</p:xslt>
 	</p:pipeline>
 
-	<p:pipeline type="dbp:preprocess" name="preprocess-main">
+	<p:declare-step type="dbp:preprocess" name="preprocess-main">
 		<p:output port="result" sequence="true" primary="true">
-			<p:pipe step="process" port="result"/>
+			<p:pipe step="custom-preprocess" port="result"/>
 		</p:output>
 		<p:output port="out-params" sequence="true" primary="false">
 			<p:pipe step="all-parameters" port="result" />
 		</p:output>
+		<p:input port="source" sequence="true" primary="true" />
 		<p:input port="original-source" primary="false" />
-		<p:input port="parameters" kind="parameters" />
+		<p:input port="parameters" kind="parameter" />
 		<p:option name="preprocess-params-file" select="''" />
 		<p:option name="preprocess" select="''" />
 
@@ -151,6 +152,9 @@
 		</p:parameters>
 
 		<p:xslt name="profile">
+			<p:input port="source">
+				<p:pipe step="transclude" port="result" />
+			</p:input>
 			<p:input port="stylesheet">
 				<p:pipe step="parametrize-profile" port="result" />
 			</p:input>
@@ -256,5 +260,5 @@
 				</p:xslt>
 			</p:otherwise>
 		</p:choose>
-	</p:pipeline>
+	</p:declare-step>
 </p:library>

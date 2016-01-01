@@ -22,6 +22,7 @@
 <p:option name="postprocess" select="''"/>
 <p:option name="return-secondary" select="'false'"/>
 <p:option name="pdf" select="'/tmp/db-foprint.pdf'"/>
+<p:option name="initial-stylesheet" select="''" />
 
 <p:declare-step type="cx:message">
   <p:input port="source" sequence="true"/>

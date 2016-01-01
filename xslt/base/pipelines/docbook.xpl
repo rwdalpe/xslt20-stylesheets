@@ -34,8 +34,6 @@
 <p:import href="db-foprint.xpl"/>
 
 <dbp:preprocess name="preprocessed">
-	<p:output port="result" sequence="true" primary="true" />
-	<p:output port="out-params" sequence="true" primary="false" />
 	<p:input port="original-source">
 		<p:pipe step="main" port="source" />
 	</p:input>

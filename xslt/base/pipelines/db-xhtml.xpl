@@ -29,7 +29,7 @@
 	
 <p:variable name="slides-initial-stylesheet" select="if ($initial-stylesheet != '') 
 	then $initial-stylesheet 
-	else '../../slides/html/plain.xsl" />
+	else '../../slides/html/plain.xsl'" />
 	
 <p:variable name="slidenotes-initial-stylesheet" select="if ($initial-stylesheet != '') 
 	then $initial-stylesheet 
@@ -49,9 +49,12 @@
     <p:output port="secondary" sequence="true">
       <p:pipe step="html-docbook" port="secondary"/>
     </p:output>
+		<p:load name="load-stylesheet">
+			<p:with-option name="href" select="$html-initial-stylesheet" />
+		</p:load>
     <p:xslt name="html-docbook">
       <p:input port="stylesheet">
-        <p:document href="$html-initial-stylesheet"/>
+        <p:pipe step="load-stylesheet" port="result" />
       </p:input>
     </p:xslt>
   </p:when>
@@ -60,9 +63,12 @@
     <p:output port="secondary" sequence="true">
       <p:pipe step="html-slides" port="secondary"/>
     </p:output>
+		<p:load name="load-stylesheet">
+			<p:with-option name="href" select="$slides-initial-stylesheet" />
+		</p:load>
     <p:xslt name="html-slides">
       <p:input port="stylesheet">
-        <p:document href="$slides-initial-stylesheet"/>
+        <p:pipe step="load-stylesheet" port="result" />
       </p:input>
     </p:xslt>
   </p:when>
@@ -71,9 +77,12 @@
     <p:output port="secondary" sequence="true">
       <p:pipe step="html-slides-notes" port="secondary"/>
     </p:output>
+		<p:load name="load-stylesheet">
+			<p:with-option name="href" select="$slidenotes-initial-stylesheet" />
+		</p:load>
     <p:xslt name="html-slides-notes">
       <p:input port="stylesheet">
-        <p:document href="$slidenotes-initial-stylesheet"/>
+        <p:pipe step="load-stylesheet" port="result" />
       </p:input>
     </p:xslt>
   </p:when>
@@ -82,9 +91,12 @@
     <p:output port="secondary" sequence="true">
       <p:pipe step="html-publishers" port="secondary"/>
     </p:output>
-    <p:xslt name="html-publishers">
+		<p:load name="load-stylesheet">
+			<p:with-option name="href" select="$publishers-initial-stylesheet" />
+		</p:load>
+		<p:xslt name="html-publishers">
       <p:input port="stylesheet">
-        <p:document href="$publishers-initial-stylesheet"/>
+        <p:pipe step="load-stylesheet" port="result" />
       </p:input>
     </p:xslt>
   </p:when>
@@ -93,9 +105,12 @@
     <p:output port="secondary" sequence="true">
       <p:pipe step="html-chunk" port="secondary"/>
     </p:output>
+		<p:load name="load-stylesheet">
+			<p:with-option name="href" select="$chunk-initial-stylesheet" />
+		</p:load>
     <p:xslt name="html-chunk">
       <p:input port="stylesheet">
-        <p:document href="$chunk-initial-stylesheet"/>
+        <p:pipe step="load-stylesheet" port="result" />
       </p:input>
     </p:xslt>
   </p:when>
