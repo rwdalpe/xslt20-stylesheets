@@ -10,6 +10,6 @@ deploy:
     secure: "EYpO8wedlYl178mzU+4A5nodw9vvpa1i28VpIkghXc5JiTiODnzarSPLhlK+pLALqYdBCCTjI1SAiU2ya1tR7UJiiTyG+axZfz989EsuA3pVFD4CtN1ltNqGfaDB7uNdBNJBXM3vAxrFxceqLO5VHNBLh7Mu+UeDCPXD0E/CelBvr2hOG9H+ADciBrTymCNWTGV9wQog6WUSMAiy9ELccJSAQtvuonYOHS/r6V/7FWKmwC6ZXFau+h6gE48tWwNbZCoGE2VN5l+kpeKTLBkOiT5DUOyfk8ssjV1DaQlTQFRmKL1cAG+Alx3h5n6BQmaVY12Amw1p69apAJEm9eV9gU1UWMOoMaPVrmpwyXaDbFjfWcUI8vFvZ5lQL8fc1sxgti5Cf8btjiTdJdR9ZXeTKoqvXBqB33Ezs/BRnY3vCSu6FGk1FocrRnWVWyp7coEXChG+ZUvqmHZz9qPY2dNa6Far4AgDER39NEpO8rNH7ILQW4H1bU2I892BLvqQZp9+oKBj8tgoJBZ6NreMexCSoRn54Xm5SoqlstyiY6OmBSYfK33LMUIcBRpSEWUD0Gj7Qme8g5W8T82FlmMzZsuA5CzuYdb6TwiG0cNB9mjBn0Crht6mybS6bJLQiIR8EMyN3IY/VzxE6USWF/SHZduPY5ro5a0lO5UE/A/jLC4BuZw="
   skip_cleanup: true
   file_glob: true
-  file: dist/*rwdalpe.zip
+  file: build/distributions/*rwdalpe*.zip
   on:
     tags: true
