@@ -79,27 +79,40 @@ identified.</entry>
 	    <xsl:apply-templates/>
 	  </a>
 	</xsl:when>
-        <xsl:when test="not(f:findid(@linkend,.))">
+        <xsl:when test="@linkend">
+          <xsl:choose>
+            <xsl:when test="not(f:findid(@linkend,.))">
+              <xsl:message>
+                <xsl:text>Attempt to link to undefined ID: </xsl:text>
+                <xsl:value-of select="@linkend"/>
+              </xsl:message>
+              <span class="markup-error">
+                <xsl:sequence select="f:html-attributes(., @xml:id, ())"/>
+                <xsl:text>@@LINKEND: </xsl:text>
+                <xsl:value-of select="@linkend"/>
+                <xsl:text>@@</xsl:text>
+              </span>
+            </xsl:when>
+	    <xsl:otherwise>
+	      <a href="{f:href(., f:findid(@linkend,.))}">
+                <xsl:sequence select="f:html-attributes(.)"/>
+	        <xsl:if test="$title != ''">
+	          <xsl:attribute name="title" select="$title"/>
+	        </xsl:if>
+	        <xsl:apply-templates/>
+	      </a>
+	    </xsl:otherwise>
+          </xsl:choose>
+        </xsl:when>
+        <xsl:otherwise>
           <xsl:message>
-            <xsl:text>Attempt to link to undefined ID: </xsl:text>
-            <xsl:value-of select="@linkend"/>
+            <xsl:text>Link element with no target?</xsl:text>
           </xsl:message>
           <span class="markup-error">
             <xsl:sequence select="f:html-attributes(., @xml:id, ())"/>
-            <xsl:text>@@LINKEND: </xsl:text>
-            <xsl:value-of select="@linkend"/>
-            <xsl:text>@@</xsl:text>
+            <xsl:text>@@NO TARGET@@</xsl:text>
           </span>
-        </xsl:when>
-	<xsl:otherwise>
-	  <a href="{f:href(., f:findid(@linkend,.))}">
-            <xsl:sequence select="f:html-attributes(.)"/>
-	    <xsl:if test="$title != ''">
-	      <xsl:attribute name="title" select="$title"/>
-	    </xsl:if>
-	    <xsl:apply-templates/>
-	  </a>
-	</xsl:otherwise>
+        </xsl:otherwise>
       </xsl:choose>
     </xsl:when>
     <xsl:otherwise>
@@ -1059,6 +1072,7 @@ cross references to that element.</para>
 <xsl:template match="db:co" mode="m:xref-to">
   <xsl:param name="referrer"/>
   <xsl:param name="xrefstyle"/>
+  <xsl:attribute name="class" select="'callout-link'"/>
   <xsl:apply-templates select="." mode="m:callout-bug"/>
 </xsl:template>
 

@@ -6,12 +6,14 @@
                 xmlns:fn="http://www.w3.org/2005/xpath-functions"
                 xmlns:h="http://www.w3.org/1999/xhtml"
                 xmlns:m="http://docbook.org/xslt/ns/mode"
-		xmlns:t="http://docbook.org/xslt/ns/template"
+                xmlns:mp="http://docbook.org/xslt/ns/mode/private"
+                xmlns:t="http://docbook.org/xslt/ns/template"
                 xmlns:u="http://nwalsh.com/xsl/unittests#"
                 xmlns:xlink='http://www.w3.org/1999/xlink'
+                xmlns:ghost="http://docbook.org/ns/docbook/ephemeral"
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
                 xmlns="http://www.w3.org/1999/xhtml"
-                exclude-result-prefixes="db doc f fn h m t u xlink xs"
+                exclude-result-prefixes="db doc f fn h m mp t u xlink ghost xs"
                 version="2.0">
 
 <!-- ============================================================ -->
@@ -173,43 +175,174 @@ and a CSS style is specified.</para>
 
 <!-- ====================================================================== -->
 
-<doc:template name="t:javascript" xmlns="http://docbook.org/ns/docbook">
-<refpurpose>Template for inserting JavaScript</refpurpose>
+<xsl:template match="*" mode="mp:javascript-head">
+  <script type="text/javascript"
+          src="{concat($resource.root, 'js/dbmodnizr.js')}"/>
+
+  <xsl:choose>
+    <xsl:when test="$syntax-highlighter != '0'">
+      <link href="{concat($resource.root, 'css/prism.css')}" rel="stylesheet" 
+            type="text/css"/>
+      <link href="{concat($resource.root, 'css/db-prism.css')}" rel="stylesheet"
+            type="text/css"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <link href="{concat($resource.root, 'css/db-noprism.css')}" rel="stylesheet"
+            type="text/css"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
+
+<xsl:template match="*" mode="m:javascript-head">
+  <!-- nop -->
+</xsl:template>
+
+<xsl:template match="*" mode="mp:javascript-body">
+	<xsl:if test="$scripts.builtin.ignore != '0'">
+		<xsl:if test="f:include-jquery(.)">
+			<script type="text/javascript" src="{$cdn.jquery}"/>
+		</xsl:if>
+
+		<xsl:if test="f:include-jqueryui(.)">
+			<script type="text/javascript" src="{$cdn.jqueryui}"/>
+		</xsl:if>
+
+		<xsl:if test="exists(.//ghost:annotation)
+									or exists(.//db:mediaobject/db:textobject[not(db:phrase)])">
+			<script type="text/javascript"
+							src="{concat($resource.root, 'js/annotation.js')}"/>
+		</xsl:if>
+
+		<xsl:if test="exists(.//*[@xlink:type='extended'])">
+			<script type="text/javascript"
+							src="{concat($resource.root, 'js/nhrefs.js')}"/>
+		</xsl:if>
+	</xsl:if>  
+
+	<xsl:if test="$syntax-highlighter != '0'">
+		<script src="{concat($resource.root, 'js/prism.js')}"></script>
+	</xsl:if>
+</xsl:template>
+
+<xsl:template match="*" mode="m:javascript-body">
+  <!-- nop -->
+</xsl:template>
+
+<xsl:function name="f:include-jquery">
+  <xsl:param name="node"/>
+
+  <xsl:sequence select="exists($node//ghost:annotation)
+            or exists($node//*[@xlink:type='extended'])
+            or exists($node//db:mediaobject/db:textobject[not(db:phrase)])"/>
+</xsl:function>
+
+<xsl:function name="f:include-jqueryui">
+  <xsl:param name="node"/>
+
+  <xsl:sequence select="exists($node//ghost:annotation)
+            or exists($node//*[@xlink:type='extended'])
+            or exists($node//db:mediaobject/db:textobject[not(db:phrase)])"/>
+</xsl:function>
+
+<xsl:function name="f:syntax-highlight" as="xs:boolean">
+  <xsl:param name="node"/>
+
+  <xsl:variable name="minlines" as="xs:decimal"
+                select="(xs:decimal(f:lineNumbering($node,'minlines')),0)[1]"/>
+
+  <!-- count the approximate number of lines... -->
+  <xsl:variable name="numlines"
+                select="count(tokenize(string($node), '&#10;'))"/>
+
+  <xsl:sequence select="f:lineNumbering($node,'everyNth') != 0
+                        and $minlines &lt;= $numlines"/>
+</xsl:function>
+
+<xsl:function name="f:syntax-highlight-class" as="xs:string*">
+  <xsl:param name="node"/>
+
+  <xsl:variable name="numbered" select="f:syntax-highlight($node)"/>
+
+  <xsl:if test="$syntax-highlighter != '0'">
+    <xsl:variable name="language" select="$node/@language/string()"/>
+    <xsl:variable name="mapped-language"
+                  select="($syntax.highlight.map[@key=$language]/@value/string(),
+                           $language)[1]"/>
+
+    <xsl:variable name="language" as="xs:string?"
+                  select="if ($mapped-language)
+                          then concat('language-', $mapped-language)
+                          else 'language-none'"/>
+
+    <xsl:variable name="numbers" as="xs:string?"
+                  select="if ($node/ancestor::db:programlistingco
+                              or $node/ancestor::db:screenco
+                              or not($numbered))
+                          then ()
+                          else 'line-numbers'"/>
+
+    <xsl:sequence select="($language,$numbers,$node/@role)"/>
+  </xsl:if>
+</xsl:function>
+
+<!-- ====================================================================== -->
+
+<xsl:template match="*" mode="mp:css">
+  <xsl:if test="string($docbook.css) != ''">
+    <link rel="stylesheet" type="text/css" href="{$docbook.css}"/>
+  </xsl:if>
+
+  <xsl:if test=".//ghost:annotation or .//*[@xlink:type='extended']">
+    <link rel="stylesheet" type="text/css" href="{$cdn.jqueryui.css}"/>
+  </xsl:if>
+</xsl:template>
+
+<xsl:template match="*" mode="m:css">
+  <!-- nop -->
+</xsl:template>
+
+<!-- ====================================================================== -->
+
+<doc:template name="mp:html-head" xmlns="http://docbook.org/ns/docbook">
+<refpurpose>Mode for generating the head element</refpurpose>
 
 <refdescription>
-<para>T.B.D.</para>
+<para>This mode is called on an element when it is the root of an
+HTML document. It is responsible for generating the HTML <tag>head</tag> element
+and its content.</para>
 </refdescription>
 </doc:template>
 
-<xsl:template name="t:system-javascript">
+<xsl:template match="*" mode="mp:html-head">
   <xsl:param name="node" select="."/>
 
-  <xsl:if test="$scripts.builtin.ignore != '0'">
-    <xsl:if test="//db:annotation">
-      <script type="text/javascript"
-              src="{concat($resource.root, 'js/AnchorPosition.js')}"/>
-      <script type="text/javascript"
-              src="{concat($resource.root, 'js/PopupWindow.js')}"/>
-      <script type="text/javascript"
-              src="{concat($resource.root, 'js/annotation.js')}"/>
-    </xsl:if>
-  
-    <script type="text/javascript"
-            src="{concat($resource.root, 'js/dbmodnizr.js')}"/>
-  
-    <xsl:if test="//*[@xlink:type='extended']">
-      <script type="text/javascript"
-              src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"/>
-      <script type="text/javascript"
-              src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"/>
-      <link type="text/css" rel="stylesheet"
-            href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/start/jquery-ui.css"/>
-      <script type="text/javascript"
-              src="{concat($resource.root, 'js/nhrefs.js')}"/>
-    </xsl:if>
-  </xsl:if>  
-  <xsl:if test="$styles.builtin.ignore != '0'">
-    <xsl:call-template name="t:syntax-highlight-head"/>
+	<xsl:call-template name="t:html-title-content">
+		<xsl:with-param name="node" select="$node"/>
+	</xsl:call-template>
+
+  <xsl:if test="$html.base != ''">
+    <base href="{$html.base}"/>
+  </xsl:if>
+
+  <xsl:apply-templates select="." mode="mp:head-content"/>
+  <xsl:apply-templates select="." mode="m:head-content"/>
+
+  <xsl:apply-templates select="." mode="m:head-meta"/>
+  <xsl:apply-templates select="." mode="m:head-links"/>
+
+  <xsl:if test="$html.stylesheets != ''">
+    <xsl:for-each select="tokenize($html.stylesheets, '\s+')">
+      <link rel="stylesheet" href="{.}">
+        <xsl:choose>
+          <xsl:when test="ends-with(.,'.css')">
+            <xsl:attribute name="type" select="'text/css'"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <!-- ??? what type is this ??? -->
+          </xsl:otherwise>
+        </xsl:choose>
+      </link>
+    </xsl:for-each>
   </xsl:if>
 
   <xsl:if test="$html.scripts != ''">
@@ -226,172 +359,9 @@ and a CSS style is specified.</para>
       </script>
     </xsl:for-each>
   </xsl:if>
-</xsl:template>
-
-<xsl:template name="t:user-javascript">
-  <xsl:param name="node" select="."/>
-</xsl:template>
-
-<xsl:template name="t:user-javascript-body">
-	<xsl:param name="node" select="." />
-</xsl:template>
-
-<xsl:template name="t:javascript">
-  <xsl:param name="node" select="."/>
-  <xsl:call-template name="t:system-javascript">
-    <xsl:with-param name="node" select="$node"/>
-  </xsl:call-template>
-  <xsl:call-template name="t:user-javascript">
-    <xsl:with-param name="node" select="$node"/>
-  </xsl:call-template>
-</xsl:template>
-
-<xsl:template name="t:syntax-highlight-head">
-  <xsl:choose>
-    <xsl:when test="$syntax-highlighter != '0'">
-      <link href="{concat($resource.root, 'css/prism.css')}" rel="stylesheet" />
-      <link href="{concat($resource.root, 'css/db-prism.css')}" rel="stylesheet" />
-    </xsl:when>
-    <xsl:otherwise>
-      <link href="{concat($resource.root, 'css/db-noprism.css')}" rel="stylesheet" />
-    </xsl:otherwise>
-  </xsl:choose>
-</xsl:template>
-
-<xsl:template name="t:syntax-highlight-body">
-  <xsl:if test="$syntax-highlighter != '0'">
-    <script src="{concat($resource.root, 'js/prism.js')}"></script>
-  </xsl:if>
-</xsl:template>
-
-<xsl:function name="f:syntax-highlight-class" as="xs:string*">
-  <xsl:param name="node"/>
-
-  <xsl:if test="$syntax-highlighter != '0'">
-    <xsl:variable name="language" select="$node/@language/string()"/>
-    <xsl:variable name="mapped-language"
-                  select="($syntax.highlight.map[@key=$language]/@value/string(),
-                           $language)[1]"/>
-
-    <xsl:variable name="language" as="xs:string?"
-                  select="if ($mapped-language)
-                          then concat('language-', $mapped-language)
-                          else ()"/>
-
-    <xsl:variable name="numbered" as="xs:boolean"
-                  select="f:lineNumbering($node,'everyNth') != 0"/>
-
-    <xsl:variable name="numbers" as="xs:string?"
-                  select="if ($node/ancestor::db:programlistingco
-                              or $node/ancestor::db:screenco
-                              or not($numbered))
-                          then ()
-                          else 'line-numbers'"/>
-
-    <xsl:sequence select="($language,$numbers,$node/@role)"/>
-  </xsl:if>
-</xsl:function>
-
-<!-- ====================================================================== -->
-
-<doc:template name="t:css" xmlns="http://docbook.org/ns/docbook">
-<refpurpose>Template for inserting CSS</refpurpose>
-
-<refdescription>
-<para>T.B.D.</para>
-</refdescription>
-</doc:template>
-
-<xsl:template name="t:css">
-  <xsl:param name="node" select="."/>
-  <xsl:choose>
-    <xsl:when test="string($docbook.css) = ''">
-      <!-- nop -->
-    </xsl:when>
-    <xsl:when test="$docbook.css.inline = 0">
-      <link rel="stylesheet" type="text/css" href="{$docbook.css}"/>
-    </xsl:when>
-    <xsl:otherwise>
-      <style type="text/css">
-        <xsl:copy-of select="unparsed-text($docbook.css, 'utf-8')"/>
-      </style>
-    </xsl:otherwise>
-  </xsl:choose>
-</xsl:template>
-
-<!-- ====================================================================== -->
-
-<doc:template name="t:head" xmlns="http://docbook.org/ns/docbook">
-<refpurpose>Template for generating the head element</refpurpose>
-
-<refdescription>
-<para>This template is called to generate the HTML head for the
-primary result document.</para>
-</refdescription>
-</doc:template>
-
-<xsl:template name="t:head">
-  <xsl:param name="node" select="."/>
-
-  <head>
-    <xsl:call-template name="t:html-title-content">
-      <xsl:with-param name="node" select="$node"/>
-    </xsl:call-template>
-
-    <xsl:if test="$html.base != ''">
-      <base href="{$html.base}"/>
-    </xsl:if>
-
-    <xsl:call-template name="t:system-head-content">
-      <xsl:with-param name="node" select="$node"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="t:head-meta">
-      <xsl:with-param name="node" select="$node"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="t:head-links">
-      <xsl:with-param name="node" select="$node"/>
-    </xsl:call-template>
-
-    <xsl:if test="($draft.mode = 'yes'
-                   or ($draft.mode = 'maybe' and
-		       $node/ancestor-or-self::*[@status][1]/@status = 'draft'))
-                  and $draft.watermark.image != ''">
-      <style type="text/css">
-body { background-image: url('<xsl:value-of select="$draft.watermark.image"/>');
-       background-repeat: no-repeat;
-       background-position: center center;
-       /* The following property make the watermark "fixed" on the page. */
-       /* I think that's just a bit too distracting for the reader... */
-       /* background-attachment: fixed; */
-     }
-</style>
-    </xsl:if>
-
-    <xsl:if test="$html.stylesheets != ''">
-      <xsl:for-each select="tokenize($html.stylesheets, '\s+')">
-        <link rel="stylesheet" href="{.}">
-          <xsl:choose>
-            <xsl:when test="ends-with(.,'.css')">
-              <xsl:attribute name="type" select="'text/css'"/>
-            </xsl:when>
-            <xsl:otherwise>
-              <!-- ??? what type is this ??? -->
-            </xsl:otherwise>
-          </xsl:choose>
-        </link>
-      </xsl:for-each>
-    </xsl:if>
-
-    <xsl:call-template name="t:javascript">
-      <xsl:with-param name="node" select="$node"/>
-    </xsl:call-template>
-
-    <xsl:call-template name="t:user-head-content">
-      <xsl:with-param name="node" select="$node"/>
-    </xsl:call-template>
-  </head>
+	
+  <xsl:apply-templates select="." mode="mp:javascript-head"/>
+  <xsl:apply-templates select="." mode="m:javascript-head"/>
 </xsl:template>
 
 <xsl:template name="t:html-title-content">
@@ -403,26 +373,27 @@ body { background-image: url('<xsl:value-of select="$draft.watermark.image"/>');
 
 <!-- ====================================================================== -->
 
-<doc:template name="t:head-meta" xmlns="http://docbook.org/ns/docbook">
-<refpurpose>Template for inserting metadata in the head</refpurpose>
+<doc:template name="m:head-meta" xmlns="http://docbook.org/ns/docbook">
+<refpurpose>Mode for inserting metadata in the head</refpurpose>
 
 <refdescription>
-<para>This template is called in the HTML <tag>head</tag> to insert
-HTML <tag>meta</tag> elements.</para>
+<para>This mode is called on an element when it is the root of an
+HTML document. It is responsible for generating any necessary
+<tag>meta</tag> elements into the <tag>head</tag>.
+</para>
 </refdescription>
 </doc:template>
 
-<xsl:template name="t:head-meta">
-  <xsl:param name="node" select="."/>
-
+<xsl:template match="*" mode="m:head-meta">
   <xsl:if test="string($generate.meta.generator) != '0'">
     <meta name="generator" content="DocBook XSL 2.0 Stylesheets V{$VERSION}"/>
   </xsl:if>
 
-  <xsl:if test="string($generate.meta.abstract) != '0' and $node/db:info/db:abstract">
+  <xsl:if test="string($generate.meta.abstract) != '0'
+                and db:info/db:abstract">
     <meta name="description">
       <xsl:attribute name="content">
-        <xsl:for-each select="$node/db:info/db:abstract[1]/*">
+        <xsl:for-each select="db:info/db:abstract[1]/*">
           <xsl:value-of select="."/>
           <xsl:if test="position() &lt; last()">
             <xsl:text> </xsl:text>
@@ -432,25 +403,25 @@ HTML <tag>meta</tag> elements.</para>
     </meta>
   </xsl:if>
 
-  <xsl:apply-templates select="$node" mode="m:head-keywords-content"/>
+  <xsl:apply-templates select="." mode="m:head-keywords-content"/>
 </xsl:template>
 
 <!-- ====================================================================== -->
 
-<doc:template name="t:head-links" xmlns="http://docbook.org/ns/docbook">
-<refpurpose>Template for inserting links in the head</refpurpose>
+<doc:template name="m:head-links" xmlns="http://docbook.org/ns/docbook">
+<refpurpose>Mode for inserting links in the head</refpurpose>
 
 <refdescription>
-<para>This template is called in the HTML <tag>head</tag> to insert
-HTML <tag>link</tag> elements.
+<para>This mode is called on an element when it is the root of an
+HTML document. It is responsible for generating any necessary
+<tag>link</tag> elements in the <tag>head</tag>.
 </para>
 </refdescription>
 </doc:template>
 
-<xsl:template name="t:head-links">
-  <xsl:param name="node" select="."/>
-
-  <xsl:call-template name="t:css"/>
+<xsl:template match="*" mode="m:head-links">
+  <xsl:apply-templates select="." mode="mp:css"/>
+  <xsl:apply-templates select="." mode="m:css"/>
 
   <xsl:if test="$link.madeby.uri != ''">
     <link rev="made"
@@ -642,40 +613,32 @@ is preserved, only the wrapping <tag>a</tag> is stripped away.</para>
 
 <!-- ============================================================ -->
 
-<xsl:template name="t:user-preroot">
+<xsl:template match="*" mode="m:pre-root">
   <!-- Pre-root output, can be used to output comments and PIs. -->
   <!-- This must not output any element content! -->
 </xsl:template>
 
-<xsl:template name="t:system-head-content">
-  <xsl:param name="node" select="."/>
+<xsl:template match="*" mode="mp:head-content">
   <!-- system.head.content is like user.head.content, except that
        it is called before head.content. This is important because it
        means, for example, that <style> elements output by system-head-content
        have a lower CSS precedence than the users stylesheet. -->
 
   <meta charset="utf-8"/>
-
-  <!-- See http://remysharp.com/2009/01/07/html5-enabling-script/ -->
-  <!--
-  <xsl:comment>[if lt IE 9]>
-&lt;script src="http://html5shim.googlecode.com/svn/trunk/html5.js">&lt;/script>
-&lt;![endif]</xsl:comment>
-  -->
 </xsl:template>
 
-<xsl:template name="t:user-head-content">
-  <xsl:param name="node" select="."/>
+<xsl:template match="*" mode="m:head-content">
+  <!-- nop -->
 </xsl:template>
 
-<xsl:template name="t:user-header-content">
+<xsl:template match="*" mode="m:user-header-content">
   <xsl:param name="node" select="."/>
   <xsl:param name="next" select="()"/>
   <xsl:param name="prev" select="()"/>
   <xsl:param name="up" select="()"/>
 </xsl:template>
 
-<xsl:template name="t:user-footer-content">
+<xsl:template match="*" mode="m:user-footer-content">
   <xsl:param name="node" select="."/>
   <xsl:param name="next" select="()"/>
   <xsl:param name="prev" select="()"/>
@@ -683,9 +646,19 @@ is preserved, only the wrapping <tag>a</tag> is stripped away.</para>
 </xsl:template>
 
 <!-- ====================================================================== -->
+<doc:template name="m:head-keywords-content" xmlns="http://docbook.org/ns/docbook">
+<refpurpose>Mode for generating keyword metadata in the head</refpurpose>
+
+<refdescription>
+<para>This mode is called on an element when it is the root of an
+HTML document. It is responsible for generating the keyword-related
+<tag>meta</tag> elements in the <tag>head</tag>.</para>
+</refdescription>
+</doc:template>
 
 <xsl:template match="*" mode="m:head-keywords-content">
-  <xsl:apply-templates select="db:info/db:keywordset" mode="m:head-keywords-content"/>
+  <xsl:apply-templates select="db:info/db:keywordset"
+                       mode="m:head-keywords-content"/>
   <xsl:if test="string($inherit.keywords) != '0' and parent::*">
     <xsl:apply-templates select="parent::*" mode="m:head-keywords-content"/>
   </xsl:if>

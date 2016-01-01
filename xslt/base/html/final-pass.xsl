@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-		xmlns="http://www.w3.org/1999/xhtml"
-		xmlns:h="http://www.w3.org/1999/xhtml"
-		xmlns:f="http://docbook.org/xslt/ns/extension"
-		xmlns:t="http://docbook.org/xslt/ns/template"
-		xmlns:m="http://docbook.org/xslt/ns/mode"
-		xmlns:fn="http://www.w3.org/2005/xpath-functions"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://docbook.org/xslt/ns/extension"
+                xmlns:t="http://docbook.org/xslt/ns/template"
+                xmlns:m="http://docbook.org/xslt/ns/mode"
+                xmlns:mp="http://docbook.org/xslt/ns/mode/private"
+                xmlns:fn="http://www.w3.org/2005/xpath-functions"
                 xmlns:ghost="http://docbook.org/ns/docbook/ephemeral"
-		xmlns:db="http://docbook.org/ns/docbook"
-		exclude-result-prefixes="h f m fn db t ghost"
+                xmlns:db="http://docbook.org/ns/docbook"
+                exclude-result-prefixes="h f m mp fn db t ghost"
                 version="2.0">
 
   <xsl:include href="../VERSION.xsl"/>
   <xsl:include href="param.xsl"/>
   <xsl:include href="../common/control.xsl"/>
+  <xsl:include href="../common/dbfunctions.xsl"/>
   <xsl:include href="../common/l10n.xsl"/>
   <xsl:include href="../common/spspace.xsl"/>
   <xsl:include href="../common/gentext.xsl"/>
-  <xsl:include href="../common/normalize.xsl"/>
-  <xsl:include href="../common/functions.xsl"/>
   <xsl:include href="../common/common.xsl"/>
   <xsl:include href="../common/label-content.xsl"/>
   <xsl:include href="../common/title-content.xsl"/>
@@ -72,10 +72,11 @@
     <xsl:message>Styling...</xsl:message>
   </xsl:if>
 
+  <xsl:apply-templates select="*" mode="m:pre-root"/>
   <html>
-    <xsl:call-template name="t:head">
-      <xsl:with-param name="node" select="/*"/>
-    </xsl:call-template>
+    <head>
+      <xsl:apply-templates select="*" mode="mp:html-head"/>
+    </head>
     <body>
       <xsl:call-template name="t:body-attributes"/>
       <xsl:if test="/*/@status">
@@ -83,14 +84,11 @@
       </xsl:if>
 
       <xsl:apply-templates/>
-      <xsl:call-template name="t:syntax-highlight-body"/>
-			<xsl:call-template name="t:user-javascript-body" />
+
+      <xsl:apply-templates select="." mode="mp:javascript-body"/>
+      <xsl:apply-templates select="." mode="m:javascript-body"/>
     </body>
   </html>
-
-  <xsl:for-each select=".//db:mediaobject[db:textobject[not(db:phrase)]]">
-    <xsl:call-template name="t:write-longdesc"/>
-  </xsl:for-each>
 </xsl:template>
 
 <xsl:template match="*">

@@ -7,12 +7,13 @@
                 xmlns:ghost="http://docbook.org/ns/docbook/ephemeral"
                 xmlns:h="http://www.w3.org/1999/xhtml"
                 xmlns:m="http://docbook.org/xslt/ns/mode"
+                xmlns:mp="http://docbook.org/xslt/ns/mode/private"
                 xmlns:t="http://docbook.org/xslt/ns/template"
                 xmlns:u="http://nwalsh.com/xsl/unittests#"
                 xmlns:xlink='http://www.w3.org/1999/xlink'
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
                 xmlns:ext="http://docbook.org/extensions/xslt20"
-                exclude-result-prefixes="db doc f ghost h m t u xlink xs ext"
+                exclude-result-prefixes="db doc f ghost h m mp t u xlink xs ext"
                 version="2.0">
 
 <!-- ==================================================================== -->
@@ -271,7 +272,7 @@ vertical alignment.</para>
   <xsl:variable name="filename" select="f:mediaobject-filename(..)"/>
 
   <xsl:variable name="imageproperties" as="xs:integer*">
-    <xsl:if test="$filename != ''">
+    <xsl:if test="$tag eq 'img' and $filename != ''">
       <xsl:call-template name="t:image-properties">
         <xsl:with-param name="image" select="$filename"/>
       </xsl:call-template>
@@ -594,6 +595,16 @@ valign: <xsl:value-of select="@valign"/></xsl:message>
                              or @valign)"/>
 
   <xsl:choose>
+    <xsl:when test="$tag = 'video'">
+      <video controls="controls">
+        <xsl:if test="$html.width != ''">
+          <xsl:attribute name="width">
+            <xsl:value-of select="$html.width"/>
+          </xsl:attribute>
+        </xsl:if>
+        <source src="{$href}"/>
+      </video>
+    </xsl:when>
     <xsl:when test="$use.viewport">
       <table border="0" summary="Manufactured viewport for HTML image"
              cellspacing="0" cellpadding="0">
@@ -912,7 +923,10 @@ valign: <xsl:value-of select="@valign"/></xsl:message>
       <xsl:apply-templates/>
     </xsl:when>
     <xsl:otherwise>
-      <xsl:apply-templates select="db:imagedata"/>
+      <!-- FIXME: Support multiple imagedata objects; see
+           https://github.com/docbook/docbook/issues/49 and
+           https://github.com/docbook/docbook/issues/52 -->
+      <xsl:apply-templates select="db:imagedata[1]"/>
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
@@ -965,7 +979,7 @@ valign: <xsl:value-of select="@valign"/></xsl:message>
 
 <xsl:template match="db:videodata">
   <xsl:call-template name="t:process-image">
-    <xsl:with-param name="tag" select="'embed'"/>
+    <xsl:with-param name="tag" select="'video'"/>
     <xsl:with-param name="alt">
       <xsl:apply-templates select="(../../db:textobject/db:phrase)[1]"/>
     </xsl:with-param>
@@ -1049,24 +1063,10 @@ valign: <xsl:value-of select="@valign"/></xsl:message>
     <xsl:otherwise>
       <xsl:choose>
         <xsl:when test="$output.dir != ''">
-          <xsl:value-of select="f:resolve-path(., iri-to-uri($output.dir))"/>
+          <xsl:value-of select="f:strip-file-uri-scheme(f:resolve-path(., iri-to-uri($output.dir)))"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="f:resolve-path(.,base-uri(.))"/>
-    <!--
-          <xsl:variable name="absuri" select="f:resolve-path(.,base-uri(.))"/>
-          <xsl:choose>
-            <xsl:when test="starts-with($absuri, 'file://')">
-              <xsl:value-of select="substring-after($absuri, 'file:/')"/>
-            </xsl:when>
-            <xsl:when test="starts-with($absuri, 'file:/')">
-              <xsl:value-of select="substring-after($absuri, 'file:')"/>
-            </xsl:when>
-            <xsl:otherwise>
-              <xsl:value-of select="$absuri"/>
-            </xsl:otherwise>
-          </xsl:choose>
-    -->
+          <xsl:value-of select="f:strip-file-uri-scheme(f:resolve-path(.,base-uri(.)))"/>
         </xsl:otherwise>
       </xsl:choose>
     </xsl:otherwise>
@@ -1099,18 +1099,11 @@ valign: <xsl:value-of select="@valign"/></xsl:message>
 <xsl:template name="t:longdesc-link">
   <xsl:param name="textobject" as="element()?"/>
 
-  <xsl:if test="exists($textobject) and $html.longdesc != 0">
-    <xsl:variable name="this.uri"
-                  select="concat($base.dir, f:href-target-uri($textobject))"/>
-
-    <xsl:variable name="href.to"
-                  select="f:trim-common-uri-paths(f:longdesc-uri($textobject),
-                                                  $this.uri)"/>
-
+  <xsl:if test="exists($textobject)">
     <div class="longdesc-link">
       <xsl:text>[</xsl:text>
-      <a href="{$href.to}" target="longdesc"
-         title="Link to long description">D</a>
+      <a class="dialog-link" href="#longdesc-{generate-id($textobject)}"
+         title="long description link">D</a>
       <xsl:text>]</xsl:text>
     </div>
   </xsl:if>
@@ -1128,15 +1121,17 @@ valign: <xsl:value-of select="@valign"/></xsl:message>
                 and $filename != ''">
 
     <xsl:result-document href="{$filename}" method="xhtml">
-      <xsl:call-template name="t:user-preroot"/>
+      <xsl:apply-templates select="." mode="m:pre-root"/>
       <html>
-        <xsl:call-template name="t:head">
-          <xsl:with-param name="node" select="."/>
-        </xsl:call-template>
+        <head>
+          <xsl:apply-templates select="." mode="mp:html-head"/>
+        </head>
         <body>
-          <xsl:for-each select="$mediaobject/db:textobject[not(db:phrase)]">
-            <xsl:apply-templates select="*"/>
-          </xsl:for-each>
+          <xsl:apply-templates
+              select="$mediaobject/db:textobject[not(db:phrase)]"/>
+
+          <xsl:apply-templates select="." mode="mp:javascript-body"/>
+          <xsl:apply-templates select="." mode="m:javascript-body"/>
         </body>
       </html>
     </xsl:result-document>

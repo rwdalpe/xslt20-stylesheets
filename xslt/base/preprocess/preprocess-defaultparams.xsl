@@ -41,5 +41,6 @@
   <xsl:param name="glossary.collection" select="''" />
   <xsl:param name="bibliography.collection" select="''" />
   <xsl:param name="docbook-namespace" select="'http://docbook.org/ns/docbook'" />
+	<xsl:param name="unify.table.titles" select="'0'"/>
   <xsl:param name="glossary.sort" select="0" />
 </xsl:stylesheet>

@@ -1,0 +1,531 @@
+// This Gradle script builds the DocBook stylesheet releases.
+//
+// Note well: there's a little Java tool in this repo, but it is not,
+// first and foremost, a Java project. For historical reasons, and
+// to keep the paths shorter and simpler, the stylesheets that are
+// in src/main/resources/xslt/ *ARE NOT SOURCES*. They're copied there
+// from xslt/ by the build process. I couldn't find a way to get
+// Gradle to accept resources directly from xslt/ without losing the
+// top-level xslt/ part of the path names. So I punted.
+
+import groovy.swing.SwingBuilder
+import java.awt.Point
+
+buildscript {
+  repositories {
+    // maven { url uri('/tmp/repo') }
+    mavenLocal()
+    mavenCentral()
+    maven { url "http://maven.restlet.org" }
+    maven { url "http://developer.marklogic.com/maven2" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+  }
+}
+
+plugins {
+  id "java"
+  id "osgi"
+  id "groovy"
+  id "maven"
+  id "maven-publish"
+  id "signing"
+}
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+  maven { url "http://maven.restlet.org" }
+  maven { url "http://developer.marklogic.com/maven2" }
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
+configurations.all {
+  resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+    if (details.requested.name == 'saxon' && details.requested.version == '8.7') {
+      details.useTarget "net.sf.saxon:Saxon-HE:" + saxonVersion
+    }
+  }
+}
+
+configurations {
+  pluginApi
+}
+
+dependencies {
+  compile fileTree(dir: 'delta').include("*.jar")
+  compile (
+    [group: 'net.sf.saxon', name: 'Saxon-HE', version: saxonVersion],
+    [group: 'com.xmlcalabash', name: 'xmlcalabash', version: '1.1.8-96'],
+    [group: 'com.xmlcalabash', name: 'xmlcalabash1-deltaxml', version: '1.1.4'],
+    [group: 'com.xmlcalabash', name: 'xmlcalabash1-print', version: '1.1.4'],
+    [group: 'com.thaiopensource', name: 'jing', version: '20091111', transitive: false],
+    [group: 'org.docbook', name: 'docbook-xsl-java-saxon', version: '1.2.1-95'],
+    // 1.2 because that's what gradleApi requires :-(
+    [group: 'commons-cli', name: 'commons-cli', version: '1.2'],
+  )
+  pluginApi gradleApi()
+}
+
+project.ext.saxonRelease = saxonVersion.substring(0,5)
+project.ext.saxonBranch  = saxonVersion.substring(0,3).replaceAll("\\.", "")
+project.ext.releaseVersion = version
+project.ext.distVersion = version + "-" + saxonBranch + snapshot
+
+def Properties versionProps = new Properties()
+def versionPropsFile = file("src/main/resources/etc/version.properties")
+versionProps['version'] = releaseVersion
+versionProps.store(versionPropsFile.newWriter(),null)
+
+compileGroovy {
+  classpath += configurations.pluginApi
+}
+
+compileJava {
+  classpath += configurations.pluginApi
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+  archives jar
+  archives sourcesJar
+  archives javadocJar
+}
+
+task copyLib(type: Copy) {
+  FileCollection runtime  = configurations.runtime
+  FileCollection localLib = fileTree(dir: 'delta').include("*.jar")
+  FileCollection lib = runtime - localLib
+  String path = ""
+  lib.each {
+    File file -> path += " lib/" + file.name
+  }
+  project.ext.runtimeClasspath = path.trim()
+
+  from lib
+  into { "build/libs/lib" }
+}
+jar.dependsOn copyLib
+
+task runtests(type: JavaExec) {
+  classpath = configurations.runtime
+
+  FileCollection result = fileTree(dir: testsRoot + "/actual/")
+  FileCollection source = fileTree(dir: testsRoot + "/src/")
+  FileCollection style  = fileTree(dir: "xslt/")
+
+  inputs.file style + source
+  outputs.file result
+
+  main = 'com.xmlcalabash.drivers.Main'
+  maxHeapSize = '1024m'
+  args('-D',
+       testsRoot + '/style/runtests.xpl',
+       'include=' + include,
+       'ignore-head=0',
+       'ignore-prism=0',
+       'srcdir=' + testsRoot + '/src/',
+       'resultdir=' + testsRoot + '/result/',
+       'actualdir=' + testsRoot + '/actual/',
+       'expecteddir=' + testsRoot + '/expected/',
+       'diffdir=' + testsRoot + '/diff/',
+      )
+}
+
+task testreport(dependsOn: runtests, type: JavaExec) {
+  classpath = configurations.runtime
+
+  inputs.file  file(testsRoot + "/style/report.xpl")
+  inputs.file  file(testsRoot + "/style/format-report.xsl")
+  inputs.dir   testsRoot + "/result/"
+  outputs.file file(testsRoot + "/index.html")
+
+  //systemProperty "log4j.configurationFile", "/home/ndw/java/log4j2-debug.xml"
+
+  main = 'com.xmlcalabash.drivers.Main'
+  maxHeapSize = '1024m'
+  args('-D',
+       '-oresult=' + testsRoot + '/index.html',
+       testsRoot + '/style/report.xpl',
+       'resultdir=' + testsRoot + '/result/',
+       'baseline=' + baseline
+      )
+}
+
+task runprinttests(type: JavaExec) {
+  classpath = configurations.runtime
+
+  //systemProperty "log4j.configurationFile", "/home/ndw/java/log4j2-debug.xml"
+
+  main = 'com.xmlcalabash.drivers.Main'
+  maxHeapSize = '1024m'
+  args('-D',
+       testsRoot + '/style/runprint.xpl',
+       'include=' + include,
+       'exclude=' + exclude,
+       'srcdir=' + testsRoot + '/src/',
+       'resultdir=' + testsRoot + '/' + print + '-result/',
+       'actualdir=' + testsRoot + '/' + print + '-actual/',
+       'expecteddir=' + testsRoot + '/' + print + '-expected/',
+       'diffdir=' + testsRoot + '/' + print + '-diff/',
+       'format=' + print,
+       'preprocess=test/style/ann-to-footnotes.xsl',
+       'css=' + css
+      )
+}
+
+task relnotes(type: JavaExec) {
+  classpath = configurations.runtime
+
+  main = 'com.xmlcalabash.drivers.Main'
+  maxHeapSize = '1024m'
+  args('-D',
+       '-oresult=docs/RELEASENOTES.html',
+       '-isource=docs/RELEASENOTES.xml',
+       '-presource.root=http://docbook.github.com/latest/',
+       'xslt/base/pipelines/docbook.xpl')
+}
+
+task makeVersion(type: JavaExec) {
+  classpath = configurations.runtime
+
+  main = 'net.sf.saxon.Transform'
+  args('-it:main',
+       '-o:xslt/base/VERSION.xsl',
+       '-xsl:tools/version.xsl',
+       'version=' + version)
+}
+
+task gentext(type: JavaExec) {
+  classpath = configurations.runtime
+
+  main = 'com.xmlcalabash.drivers.Main'
+  maxHeapSize = '1024m'
+  args('-D', '-Xallow-text-results', 'gentext/style/build.xpl')
+}
+
+gentext.onlyIf {
+  Boolean upToDate = true
+  FileCollection src = fileTree(dir: 'gentext/src').include("*.xml")
+
+  src.each {
+    File file ->
+      String srcName = file.path
+      String buildName = srcName.replace('/src/', '/build/')
+      File build = new File(buildName)
+      upToDate = upToDate && (file.lastModified() < build.lastModified())
+  }
+
+  return !upToDate
+}
+
+task makeFoParams(type: JavaExec) {
+  classpath = configurations.runtime
+
+  inputs.file  fileTree(dir: "tools/").include("mkparam.xsl")
+  inputs.file  fileTree(dir: "xslt/params/")
+  inputs.file  fileTree(dir: "xslt/base/fo/").include("param.xml")
+  outputs.file fileTree(dir: "xslt/base/fo/").include("param.xsl")
+
+  main = 'net.sf.saxon.Transform'
+  args('-xsl:tools/mkparam.xsl',
+       '-o:xslt/base/fo/param.xsl',
+       'xslt/base/fo/param.xml')
+}
+
+task makeHtmlParams(type: JavaExec) {
+  classpath = configurations.runtime
+
+  inputs.file  fileTree(dir: "tools/").include("mkparam.xsl")
+  inputs.file  fileTree(dir: "xslt/params/")
+  inputs.file  fileTree(dir: "xslt/base/html/").include("param.xml")
+  outputs.file fileTree(dir: "xslt/base/html/").include("param.xsl")
+
+  main = 'net.sf.saxon.Transform'
+  args('-xsl:tools/mkparam.xsl',
+       '-o:xslt/base/html/param.xsl',
+       'xslt/base/html/param.xml')
+}
+
+task makeParams(dependsOn: [makeFoParams, makeHtmlParams]) {
+  // nothing to see here
+}
+
+task copyLocales(dependsOn: gentext, type: Copy) {
+  from 'gentext/build'
+  into 'xslt/base/common/locales'
+  exclude { details -> details.file.name.endsWith('.xqy') }
+  includeEmptyDirs = false
+}
+
+task makeUris(type: JavaExec) {
+  classpath = configurations.runtime
+
+  inputs.file  fileTree(dir: "tools/").include("makecat.xpl")
+  inputs.file  fileTree(dir: "xslt/")
+  outputs.file fileTree(dir: "src/main/resources/etc/").include("uris.xml")
+
+  main = 'com.xmlcalabash.drivers.Main'
+  maxHeapSize = '1024m'
+  args('-D',
+       '-oresult=src/main/resources/etc/uris.xml',
+       'tools/makecat.xpl')
+}
+
+task copyJarResources(dependsOn: [copyLocales, makeParams, makeUris],
+                      type: Copy) {
+  FileTree tree = fileTree(dir: 'xslt',
+                           exclude: ['params/**'])
+  from tree
+  into 'src/main/resources/xslt'
+}
+processResources.dependsOn copyJarResources
+
+jar {
+  baseName "docbook-xslt2"
+  manifest {
+    instruction 'Built-By', builtBy
+    instruction 'Implementation-Vendor', 'Norman Walsh'
+    instruction 'Implementation-Title', 'DocBook XSLT Stylesheets'
+    instruction 'Implementation-Version', project.ext.distVersion
+    instruction 'Main-Class', 'org.docbook.Main'
+    instruction 'Bundle-SymbolicName', 'org.docbook'
+    instruction 'Bundle-RequiredExecutionEnvironment', 'J2SE-1.7'
+    instruction 'Export-Package', '*, etc'
+    instruction 'Import-Package', 'net.sf.saxon.*;version=' + project.ext.saxonRelease + ',\
+  javax.xml.*,\
+  *;resolution:=optional'
+    instruction 'DynamicImport-Package', '*'
+    // This is a bit of a hack; special case the three most likely
+    // commercial jar files for printing with CSS or FO.
+    instruction 'Class-Path', project.ext.runtimeClasspath \
+        + " lib/XfoJavaCtl.jar" \
+        + " lib/xep.jar" \
+        + " lib/prince.jar"
+  }
+}
+
+task buildDist(dependsOn: [makeVersion,copyLocales,makeParams,
+                           relnotes,testreport]) {
+  // nothing to see here
+}
+
+task copyReadme(type: Copy) {
+  from 'README.md'
+  into "build/dist/bin/"
+}
+
+task copyDocs(type: Copy) {
+  FileTree tree = fileTree(dir: 'docs')
+  from tree
+  into "build/dist/bin/docs/"
+}
+
+task copyEtc(type: Copy) {
+  FileTree tree = fileTree(dir: 'tools/distindex')
+  from tree
+  into "build/distributions/"
+}
+
+task copyResources(type: Copy) {
+  FileTree tree = fileTree(dir: 'resources', exclude: ['src/**',
+                                                       '**/*_flymake.css'])
+  from tree
+  into "build/dist/bin/resources/"
+}
+
+task copyXslt(type: Copy) {
+  FileTree tree = fileTree(dir: 'xslt',
+                           exclude: ['params/**'])
+  from tree
+  into "build/dist/bin/xslt/"
+}
+
+task copyVendors(type: Copy) {
+  from "vendor/"
+  into "build/dist/bin/vendor"
+}
+
+task copyResults(dependsOn: testreport, type: Copy) {
+  FileTree tree = fileTree(dir: 'test')
+  from tree
+  into "build/distributions/test-results/"
+}
+
+task copyAll(dependsOn: [copyReadme, copyDocs, copyResources, copyXslt,
+                         copyResults, copyVendors]) {
+  // nothing to see here
+}
+
+task zip(dependsOn: copyAll, type: Zip) {
+  from('build/dist/bin')
+  into 'docbook-xslt2-' + version
+  archiveName 'docbook-xslt2-' + version + ".zip"
+}
+
+task updateDist(dependsOn: [copyAll, buildDist, zip], type: Copy) {
+  from 'build/dist/bin/'
+  into 'build/distributions/'
+}
+
+task distJar(dependsOn: [copyAll, jar], type: Copy) {
+  from "build/libs"
+  into "build/dist/jar"
+}
+
+task distJarEtc(dependsOn: [updateDist, distJar], type: Copy) {
+  FileTree tree = fileTree(dir: 'build/dist/bin',
+                           exclude: ['xslt/**'])
+  from tree
+  into "build/dist/jar"
+}
+
+task zipJar(dependsOn: distJarEtc, type: Zip) {
+  from('build/dist/jar')
+  into 'docbook-xslt2-' + version
+  archiveName 'docbook-xslt2-' + version + "-jar.zip"
+}
+
+task dist(dependsOn: [updateDist, zipJar], type: JavaExec) {
+  classpath = configurations.runtime
+
+  main = 'com.xmlcalabash.drivers.Main'
+  maxHeapSize = '1024m'
+  args('-D',
+       '-oresult=build/distributions/index.html',
+       'tools/makeindex.xpl'
+      )
+}
+
+task clean.doFirst {
+  delete "gentext/build/"
+  delete "src/main/resources/xslt"
+  delete "xslt/base/common/locales/"
+  delete "xslt/base/fo/param.xsl"
+  delete "xslt/base/html/param.xsl"
+  delete "build/"
+  delete "test/diff"
+  delete "test/actual"
+  delete "test/result"
+}
+
+/*
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri('/tmp/repo'))
+        }
+    }
+}
+*/
+
+signing {
+  required { gradle.taskGraph.hasTask("uploadArchives") }
+  sign configurations.archives
+}
+
+// I refuse to put my PGP password in a file.
+//
+// Adapted from
+// https://www.timroes.de/2014/01/19/using-password-prompts-with-gradle-build-files/
+//
+// N.B. This can't work in a CI environment so there's no way to
+// automatically publish the artifacts from, for example, Travis CI.
+//
+gradle.taskGraph.whenReady { taskGraph ->
+  if(taskGraph.hasTask(':uploadArchives')) {
+
+    def pass = ''
+    if(System.console() == null) {
+      new SwingBuilder().edt {
+        dialog(modal: true,
+            title: 'Enter password',
+            alwaysOnTop: true,
+            resizable: false,
+            locationRelativeTo: null,
+            locationByPlatform: true,
+            // On my Linux multi-monitor setup, the dialog "appears" at
+            // the top of the virtual desktop below my desktop. So move
+            // the damned thing somewhere visible. Meh.
+            location: new Point(100,100),
+            pack: true,
+            show: true
+        ) {
+          vbox { //
+            label(text: "Please enter key passphrase:")
+            input = passwordField()
+            button(defaultButton: true, text: 'OK', actionPerformed: {
+              pass = input.password;
+              dispose();
+            })
+          }
+        }
+      }
+    } else {
+      pass = System.console().readPassword("\nPlease enter key passphrase: ")
+      pass = new String(pass)
+    }
+
+    if (pass.size() <= 0) {
+      throw new InvalidUserDataException("You must enter a password to proceed.")
+    }
+
+    allprojects { ext."signing.password" = pass }
+
+  }
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment ->
+        signing.signPom(deployment)
+      }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: sonatypeUsername, password: sonatypePassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: sonatypeUsername, password: sonatypePassword)
+      }
+
+      pom.project {
+        name 'DocBook XSLT 2.0 Stylesheets'
+        packaging 'jar'
+        description 'DocBook XSLT 2.0 stylesheets'
+        url 'https://github.com/docbook/xslt20-stylesheets'
+
+        scm {
+          url 'scm:git@github.com:docbook/xslt20-stylesheets.git'
+          connection 'scm:git@github.com:docbook/xslt20-stylesheets.git'
+          developerConnection 'scm:git@github.com:docbook/xslt20-stylesheets.git'
+        }
+
+        licenses {
+          license {
+            name 'Apache License version 2.0'
+            url 'https://www.apache.org/licenses/LICENSE-2.0'
+            distribution 'repo'
+          }
+        }
+
+        developers {
+          developer {
+            id 'ndw'
+            name 'Norman Walsh'
+          }
+        }
+      }
+    }
+  }
+}
+

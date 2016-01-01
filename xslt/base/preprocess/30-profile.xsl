@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-  xmlns:doc="http://nwalsh.com/xsl/documentation/1.0" xmlns:fp="http://docbook.org/xslt/ns/extension/private"
-  xmlns:mp="http://docbook.org/xslt/ns/mode/private" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-  exclude-result-prefixes="doc fp mp xs" version="2.0">
+                xmlns:doc="http://nwalsh.com/xsl/documentation/1.0"
+                xmlns:fp="http://docbook.org/xslt/ns/extension/private"
+                xmlns:mp="http://docbook.org/xslt/ns/mode/private"
+                xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                exclude-result-prefixes="doc fp mp xs"
+                version="2.0">
 
   <xsl:import href="preprocess-defaultparams.xsl" />
 
@@ -164,14 +167,16 @@
     <xsl:if test="exists($prof)">
       <xsl:variable name="node-values" select="tokenize($attr, $profile.separator)" />
       <xsl:variable name="profile-values" select="tokenize($prof, $profile.separator)" />
-
-      <xsl:message>
+			
+			<!--
+			<xsl:message>
         <xsl:value-of select="$node-values" />
         <xsl:text>=</xsl:text>
         <xsl:value-of select="$profile-values" />
         <xsl:text>: </xsl:text>
         <xsl:value-of select="$node-values = $profile-values" />
       </xsl:message>
+			-->
 
       <!-- take advantage of existential semantics of "=" -->
       <xsl:if test="not($node-values = $profile-values)">

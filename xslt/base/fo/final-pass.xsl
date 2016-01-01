@@ -16,8 +16,7 @@
   <xsl:include href="../common/l10n.xsl"/>
   <xsl:include href="../common/spspace.xsl"/>
   <xsl:include href="../common/gentext.xsl"/>
-  <xsl:include href="../common/normalize.xsl"/>
-  <xsl:include href="../common/functions.xsl"/>
+  <xsl:include href="../common/dbfunctions.xsl"/>
   <xsl:include href="../common/common.xsl"/>
   <xsl:include href="../common/label-content.xsl"/>
   <xsl:include href="../common/title-content.xsl"/>
@@ -31,8 +30,8 @@
   <xsl:include href="division.xsl"/>
   <xsl:include href="component.xsl"/>
   <xsl:include href="fo.xsl"/>
-<!--
   <xsl:include href="refentry.xsl"/>
+<!--
   <xsl:include href="synopsis.xsl"/>
 -->
   <xsl:include href="sections.xsl"/>

@@ -1,109 +1,91 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-  xmlns:db="http://docbook.org/ns/docbook" xmlns:fp="http://docbook.org/xslt/ns/extension/private"
-  xmlns:doc="http://nwalsh.com/xsl/documentation/1.0" xmlns:f="http://docbook.org/xslt/ns/extension"
-  xmlns:ghost="http://docbook.org/ns/docbook/ephemeral" xmlns:m="http://docbook.org/xslt/ns/mode"
-  xmlns:mp="http://docbook.org/xslt/ns/mode/private" xmlns:n="http://docbook.org/xslt/ns/normalize"
-  xmlns:xs="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="db doc f ghost m fp mp n xs"
-  version="2.0">
+                xmlns:db="http://docbook.org/ns/docbook"
+                xmlns:doc="http://nwalsh.com/xsl/documentation/1.0"
+                xmlns:f="http://docbook.org/xslt/ns/extension"
+                xmlns:ghost="http://docbook.org/ns/docbook/ephemeral"
+                xmlns:m="http://docbook.org/xslt/ns/mode"
+                xmlns:mp="http://docbook.org/xslt/ns/mode/private"
+                xmlns:n="http://docbook.org/xslt/ns/normalize"
+                xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		exclude-result-prefixes="db doc f ghost m mp n xs"
+                version="2.0">
 
-  <xsl:import href="../common/l10n.xsl" />
-  <xsl:import href="lib/normalize-cals.xsl" />
-  <xsl:import href="preprocess-defaultparams.xsl" />
+<xsl:import href="../common/functions.xsl"/>
+<xsl:import href="../common/l10n.xsl"/>
+<xsl:import href="lib/normalize-cals.xsl"/>
+<xsl:import href="preprocess-defaultparams.xsl" />
 
-  <xsl:key name="id" match="*" use="@xml:id" />
-  <xsl:key name="genid" match="*" use="generate-id(.)" />
+<xsl:key name="id" match="*" use="@xml:id"/>
+<xsl:key name="genid" match="*" use="generate-id(.)"/>
 
-  <xsl:include href="" id="parameter-include" />
+<xsl:include href="" id="parameter-include" />
 
-  <!-- ============================================================ -->
-  <!-- normalize content -->
+<xsl:template match="/">
+  <xsl:apply-templates/>
+</xsl:template>
 
-  <xsl:variable name="external.glossary">
-    <xsl:choose>
-      <xsl:when test="$glossary.collection = ''">
-        <xsl:value-of select="()" />
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:sequence select="document($glossary.collection,.)" />
-      </xsl:otherwise>
-    </xsl:choose>
-  </xsl:variable>
+<!-- ============================================================ -->
+<!-- normalize content -->
 
-  <xsl:variable name="external.bibliography">
-    <xsl:choose>
-      <xsl:when test="$bibliography.collection = ''">
-        <xsl:value-of select="()" />
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:sequence select="document($bibliography.collection,.)" />
-      </xsl:otherwise>
-    </xsl:choose>
-  </xsl:variable>
+<xsl:variable name="external.glossary">
+  <xsl:choose>
+    <xsl:when test="$glossary.collection = ''">
+      <xsl:value-of select="()"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:sequence select="document($glossary.collection,.)"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:variable>
 
-  <!-- ============================================================ -->
+<xsl:variable name="external.bibliography">
+  <xsl:choose>
+    <xsl:when test="$bibliography.collection = ''">
+      <xsl:value-of select="()"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:sequence select="document($bibliography.collection,.)"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:variable>
 
-  <doc:mode name="m:normalize" xmlns="http://docbook.org/ns/docbook">
-    <refpurpose>Mode for normalizing a DocBook document</refpurpose>
+<!-- ============================================================ -->
 
-    <refdescription>
-      <para>
-        This mode is used to normalize an input document. Normalization
-        moves all
-        <tag>title</tag>
-        ,
-        <tag>subtitle</tag>
-        , and
-        <tag>titleabbrev</tag>
-        elements inside
-        <tag>info</tag>
-        wrappers,
-        creating the wrapper if necessary.
-      </para>
-      <para>
-        If the element being normalized has a default title (e.g.,
-        <tag>bibligraphy</tag>
-        and
-        <tag>glossary</tag>
-        ), the title is made
-        explicit during normalization.
-      </para>
-      <para>External glossaries and bibliographies (not yet!) are also
-        copied by
-        normalization.
-      </para>
-    </refdescription>
-  </doc:mode>
+<doc:mode name="m:normalize" xmlns="http://docbook.org/ns/docbook">
+<refpurpose>Mode for normalizing a DocBook document</refpurpose>
 
-  <!-- ============================================================ -->
+<refdescription>
+<para>This mode is used to normalize an input document. Normalization
+moves all <tag>title</tag>, <tag>subtitle</tag>, and
+<tag>titleabbrev</tag> elements inside <tag>info</tag> wrappers,
+creating the wrapper if necessary.</para>
+<para>If the element being normalized has a default title (e.g.,
+<tag>bibligraphy</tag> and <tag>glossary</tag>), the title is made
+explicit during normalization.</para>
+<para>External glossaries and bibliographies (not yet!) are also
+copied by normalization.</para>
+</refdescription>
+</doc:mode>
 
-  <doc:template name="n:normalize-movetitle" xmlns="http://docbook.org/ns/docbook">
-    <refpurpose>
-      Moves titles inside
-      <tag>info</tag>
-    </refpurpose>
+<!-- ============================================================ -->
 
-    <refdescription>
-      <para>
-        This template moves
-        <tag>title</tag>
-        ,
-        <tag>subtitle</tag>
-        , and
-        <tag>titleabbrev</tag>
-        elements inside an
-        <tag>info</tag>
-        .
-      </para>
-    </refdescription>
+<doc:template name="n:normalize-movetitle" xmlns="http://docbook.org/ns/docbook">
+<refpurpose>Moves titles inside <tag>info</tag></refpurpose>
 
-    <refreturn>
-      <para>The transformed node.</para>
-    </refreturn>
-  </doc:template>
+<refdescription>
+<para>This template moves <tag>title</tag>, <tag>subtitle</tag>, and
+<tag>titleabbrev</tag> elements inside an <tag>info</tag>.
+</para>
+</refdescription>
 
-  <xsl:template name="n:normalize-movetitle">
-    <xsl:copy>
-      <xsl:copy-of select="@*" />
+<refreturn>
+<para>The transformed node.</para>
+</refreturn>
+</doc:template>
+
+<xsl:template name="n:normalize-movetitle">
+  <xsl:copy>
+    <xsl:copy-of select="@*"/>
 
       <xsl:choose>
         <xsl:when test="db:info">
@@ -509,73 +491,28 @@
 		      or parent::db:screen
 		      or parent::db:literallayout
 		      or parent::db:address
-		      or parent::db:funcsynopsisinfo]">
-    <xsl:choose>
-      <xsl:when test="db:textdata/@entityref">
-        <xsl:value-of
-          select="unparsed-text(unparsed-entity-uri(db:textdata/@entityref))" />
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:value-of
-          select="unparsed-text(resolve-uri(db:textdata/@fileref, base-uri(.)))" />
-      </xsl:otherwise>
-    </xsl:choose>
-  </xsl:template>
+		      or parent::db:funcsynopsisinfo]"
+	     >
+  <xsl:choose>
+    <xsl:when test="db:textdata/@entityref">
+      <xsl:value-of select="unparsed-text(unparsed-entity-uri(db:textdata/@entityref))"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of select="unparsed-text(f:resolve-path(db:textdata/@fileref, base-uri(.)))"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
 
-  <!-- CALS tables are normalized here so that they're in the right context later -->
-  <xsl:template match="db:tgroup">
-    <xsl:apply-templates select="." mode="m:cals-phase-1" />
-  </xsl:template>
+<!-- CALS tables are normalized here so that they're in the right context later -->
+<xsl:template match="db:tgroup">
+  <xsl:apply-templates select="." mode="m:cals-phase-1"/>
+</xsl:template>
 
-  <!-- Verbatim environments are normalized here too -->
-  <xsl:template
-    match="db:programlisting|db:address|db:screen|db:synopsis|db:literallayout">
-
-    <xsl:variable name="normalized" as="element()">
-      <xsl:copy>
-        <xsl:copy-of select="@*" />
-        <xsl:apply-templates />
-      </xsl:copy>
-    </xsl:variable>
-
-    <xsl:apply-templates select="$normalized" mode="m:verbatim-phase-1">
-      <xsl:with-param name="origelem" select="." />
-    </xsl:apply-templates>
-  </xsl:template>
-
-  <xsl:template match="db:programlistingco">
-    <xsl:variable name="normalized" as="element()">
-      <xsl:copy>
-        <xsl:copy-of select="@*" />
-        <xsl:copy-of select="db:info" />
-        <xsl:copy-of select="db:areaspec" />
-        <db:programlisting>
-          <xsl:copy-of select="db:programlisting/@*" />
-          <xsl:apply-templates select="db:programlisting/node()" />
-        </db:programlisting>
-        <xsl:copy-of select="db:calloutlist" />
-      </xsl:copy>
-    </xsl:variable>
-
-    <xsl:apply-templates select="$normalized" mode="m:verbatim-phase-1" />
-  </xsl:template>
-
-  <!-- HACK: m:verbatim-phase-1 was not implemented. This is a temporary noop implementation
-    that at least
-    does not strip verbatim elements. -->
-  <xsl:template match="@*|node()" mode="m:verbatim-phase-1"
-    xmlns:m="http://docbook.org/xslt/ns/mode">
-    <xsl:copy>
-      <xsl:apply-templates select="@*|node()" mode="m:verbatim-phase-1" />
-    </xsl:copy>
-  </xsl:template>
-
-  <xsl:template match="*">
-    <xsl:choose>
-      <xsl:when test="db:title|db:subtitle|db:titleabbrev|db:info/db:title">
-        <xsl:choose>
-          <xsl:when
-            test="parent::db:biblioentry
+<xsl:template match="*">
+  <xsl:choose>
+    <xsl:when test="db:title|db:subtitle|db:titleabbrev|db:info/db:title">
+      <xsl:choose>
+        <xsl:when test="parent::db:biblioentry
                         |parent::db:bibliomixed
                         |parent::db:bibliomset
                         |parent::db:biblioset">
@@ -693,97 +630,44 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:function name="f:resolve-path" as="xs:string">
-    <xsl:param name="uri" as="xs:string" />
-    <xsl:param name="abspath" as="xs:string" />
+<!-- ============================================================ -->
 
-    <xsl:value-of select="f:resolve-path($uri, $abspath, static-base-uri())" />
-  </xsl:function>
+<xsl:template match="db:informaltable[db:tr]
+                     |db:table[db:tr]"
+	      xmlns="http://docbook.org/ns/docbook">
+  <xsl:copy>
+    <xsl:apply-templates select="@*"/>
 
-  <!-- this three-argument form really only exists for testing -->
-  <xsl:function name="f:resolve-path" as="xs:string">
-    <xsl:param name="uri" as="xs:string" />
-    <xsl:param name="abspath" as="xs:string" />
-    <xsl:param name="static-base-uri" as="xs:string" />
+    <xsl:for-each-group select="*" group-by="node-name(.)">
+      <xsl:choose>
+        <xsl:when test="current-group()[1]/self::db:tr">
+          <tbody>
+            <xsl:sequence select="current-group()"/>
+          </tbody>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:sequence select="current-group()"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:for-each-group>
+  </xsl:copy>
+</xsl:template>
 
-    <xsl:choose>
-      <xsl:when test="matches($abspath, '^[-a-zA-Z0-9]+:')">
-        <!-- $abspath is an absolute URI -->
-        <xsl:value-of select="resolve-uri($uri, $abspath)" />
-      </xsl:when>
-      <xsl:when test="matches($static-base-uri, '^[-a-zA-Z0-9]+:')">
-        <!-- the static base uri is an absolute URI -->
-
-        <!-- we have to make $abspath absolute (per the finicky def in XSLT 2.0) -->
-        <!-- but if the static base uri is a file:// uri, we want to pull the -->
-        <!-- file:// bit back off the front. -->
-
-        <xsl:variable name="resolved-abs"
-          select="resolve-uri($abspath, $static-base-uri)" />
-        <xsl:variable name="resolved" select="resolve-uri($uri, $resolved-abs)" />
-
-        <!-- strip off the leading file: -->
-        <!-- this is complicated by two things, first it's not clear when we get
-          file:///path and when we get file://path; second, on a Windows system
-          if we get file://D:/path we have to remove both slashes -->
-        <xsl:choose>
-          <xsl:when test="matches($resolved, '^file://.:')">
-            <xsl:value-of select="substring-after($resolved, 'file://')" />
-          </xsl:when>
-          <xsl:when test="matches($resolved, '^file:/.:')">
-            <xsl:value-of select="substring-after($resolved, 'file:/')" />
-          </xsl:when>
-          <xsl:when test="starts-with($resolved, 'file://')">
-            <xsl:value-of select="substring-after($resolved, 'file:/')" />
-          </xsl:when>
-          <xsl:when test="starts-with($resolved, 'file:/')">
-            <xsl:value-of select="substring-after($resolved, 'file:')" />
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:value-of select="$resolved" />
-          </xsl:otherwise>
-        </xsl:choose>
-      </xsl:when>
-      <xsl:when test="matches($uri, '^[-a-zA-Z0-9]+:') or starts-with($uri, '/')">
-        <!-- $uri is already absolute -->
-        <xsl:value-of select="$uri" />
-      </xsl:when>
-      <xsl:when test="not(starts-with($abspath, '/'))">
-        <!-- if the $abspath isn't absolute, we lose -->
-        <xsl:value-of select="error((), '$abspath in f:resolve-path is not absolute')" />
-      </xsl:when>
-      <xsl:otherwise>
-        <!-- otherwise, resolve them together -->
-        <xsl:variable name="base"
-          select="replace($abspath, '^(.*)/[^/]*$', '$1')" />
-
-        <xsl:variable name="allsegs"
-          select="(tokenize(substring-after($base, '/'), '/'),
-                                         tokenize($uri, '/'))" />
-        <xsl:variable name="segs" select="$allsegs[. != '.']" />
-        <xsl:variable name="path" select="fp:resolve-dotdots($segs)" />
-        <xsl:value-of select="concat('/', string-join($path, '/'))" />
-      </xsl:otherwise>
-    </xsl:choose>
-  </xsl:function>
-
-  <xsl:function name="fp:resolve-dotdots" as="xs:string*">
-    <xsl:param name="segs" as="xs:string*" />
-    <xsl:variable name="pos" select="index-of($segs, '..')" />
-    <xsl:choose>
-      <xsl:when test="empty($pos)">
-        <xsl:sequence select="$segs" />
-      </xsl:when>
-      <xsl:when test="$pos[1] = 1">
-        <xsl:sequence select="fp:resolve-dotdots(subsequence($segs, 2))" />
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:sequence
-          select="fp:resolve-dotdots(
-                            (subsequence($segs, 1, $pos[1] - 2),
-                             subsequence($segs, $pos[1] + 1)))" />
-      </xsl:otherwise>
-    </xsl:choose>
-  </xsl:function>
+<!-- If we're unifying titles, turn the caption into a title. -->
+<xsl:template match="db:table/db:caption"
+	      xmlns="http://docbook.org/ns/docbook">
+  <xsl:choose>
+    <xsl:when test="$unify.table.titles != '0'">
+      <info>
+        <title>
+          <xsl:apply-templates select="@*,node()"/>
+        </title>
+      </info>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:next-match/>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
 
 </xsl:stylesheet>

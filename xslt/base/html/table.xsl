@@ -253,7 +253,7 @@
       <tbody class="footnotes">
         <tr>
 	  <td colspan="{@cols}">
-	    <xsl:apply-templates select="//db:footnote"
+	    <xsl:apply-templates select=".//db:footnote"
 				 mode="m:table-footnote-mode"/>
 	  </td>
 	</tr>
@@ -670,7 +670,10 @@ Defaults to <parameter>table.cell.border.thickness</parameter>.</para>
 </xsl:template>
 
 <xsl:template match="db:caption" mode="m:html">
-  <!-- suppress; dealt with by t:formal-object -->
+  <caption>
+    <xsl:sequence select="f:html-attributes(.)"/>
+    <xsl:apply-templates mode="m:html"/>
+  </caption>
 </xsl:template>
 
 <xsl:template match="*" mode="m:html">
