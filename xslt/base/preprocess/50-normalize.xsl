@@ -241,7 +241,7 @@ copied by normalization.</para>
                   </xsl:for-each-group>
                 </xsl:when>
                 <xsl:otherwise>
-                  <xsl:for-each-group select="glossentries" group-by="db:glossterm">
+                  <xsl:for-each-group select="$glossentries" group-by="db:glossterm">
                     <xsl:copy-of select="current-group()[1]"/>
                   </xsl:for-each-group>
                 </xsl:otherwise>
