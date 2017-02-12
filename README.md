@@ -6,6 +6,7 @@ This is a fork of <http://github.com/docbook/xslt20-stylesheets>.
 
 Resources (CSS, JavaScript, images, etc.) are maintained in
 [a separate repository](https://github.com/docbook/xslt20-resources).
+They are also available from [the DocBook CDN](http://cdn.docbook.org/).
 
 Some image options, such as scaling, require information about the intrinsic
 size of the image. There are Java extension functions for this purpose.
